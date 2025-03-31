@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { useUserStore } from "@/store/user-store";
 import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
+import { useState } from "react";
 
 type Data = {
   name: string;
@@ -20,17 +21,28 @@ export default function SignupForm() {
     formState: { errors },
   } = useForm<Data>();
 
-  const router = useRouter()
+  const router = useRouter();
 
+  const [error, setError] = useState("");
 
-  const {signup} = useUserStore()
+  const { signup } = useUserStore();
 
   const onSubmit = async (data: Data) => {
-    await signup({email: data.email, name: data.name, password: data.password})
-    if (useUserStore.getState().isResponseOkay) {
-      router.push("/")
+    setError("");
+    await signup({
+      email: data.email,
+      name: data.name,
+      password: data.password,
+    });
+
+    if (useUserStore.getState().isError) {
+      setError(useUserStore.getState().errorMessage!);
     }
-  }
+
+    if (useUserStore.getState().isResponseOkay) {
+      router.push("/auth/verify");
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-[80vh] flex-col">
@@ -86,17 +98,21 @@ export default function SignupForm() {
           {errors.password && (
             <p className="text-xs text-red-500">{errors.password.message}</p>
           )}
-          {
-            useUserStore.getState().isError && (<p className="text-center text-red-500 text-sm">{useUserStore.getState().errorMessage}</p>)
-          }
-
-          {
-            useUserStore.getState().isLoading ? (<Button variant={"outline"} disabled className="w-full" type="submit">
-              <LoaderCircle className="animate-spin"/>
-            </Button>) : (<Button className="w-full" type="submit">
+          <p className="text-center text-sm text-red-500">{error}</p>
+          {useUserStore.getState().isLoading ? (
+            <Button
+              variant={"outline"}
+              disabled
+              className="w-full"
+              type="submit"
+            >
+              <LoaderCircle className="animate-spin" />
+            </Button>
+          ) : (
+            <Button className="w-full" type="submit">
               Submit
-            </Button>)
-          }
+            </Button>
+          )}
         </form>
       </div>
     </div>
