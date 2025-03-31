@@ -10,6 +10,7 @@ interface User {
   isError: boolean;
   isResponseOkay: boolean;
   errorMessage: string | null;
+  username: string | null;
   signup: ({
     name,
     email,
@@ -26,7 +27,7 @@ interface User {
     email: string;
     password: string;
   }) => Promise<void>;
-  verify: ({ otp }: { otp: string }) => Promise<void>;
+  verify: ({ otp, authCookie }: { otp: string, authCookie: string }) => Promise<void>;
 }
 
 const useUserStore = create(
@@ -37,6 +38,7 @@ const useUserStore = create(
       isUserLogedIn: false,
       isResponseOkay: false,
       errorMessage: null,
+      username: null,
       // signinup
       signup: async ({ email, name, password }) => {
         set({
@@ -44,6 +46,7 @@ const useUserStore = create(
           isError: false,
           isResponseOkay: false,
           errorMessage: null,
+          isUserLogedIn: false,
         });
         // zod schema validation
         const userDataSchema = z.object({
@@ -101,7 +104,30 @@ const useUserStore = create(
           });
         }
       },
-      verify: async () => {},
+      // verify
+      verify: async ({otp, authCookie}) => {
+        set({isError: false,isLoading: true, errorMessage: null, isResponseOkay: false,isUserLogedIn: false, username: null})
+
+        try {
+          await axios.post(`${NEXT_PUBLIC_BACKEND_URL}/member/auth/verify-otp`, {
+            otp
+          }, {
+            withCredentials: true,
+            headers: {
+              "Authorization": authCookie
+            }
+          }).then((response) => {
+            if (response.data.success) {
+              set({isLoading: false, isError: false,errorMessage: null, isResponseOkay: true, isUserLogedIn: true, username: response.data.username})
+            }
+          }).catch((error) => {
+            set({isLoading: false, isError: true, errorMessage:error.response.data.message, isResponseOkay: false, username: null})
+          })
+        } catch (error) {
+          console.log(error);
+        set({isLoading: false, isError: true, errorMessage: "Something went wrong", username: null})
+        }
+      },
       signin: async () => {},
     }),
     { name: "userStore" }
