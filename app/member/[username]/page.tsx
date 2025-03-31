@@ -1,8 +1,10 @@
-import React from 'react'
+import MemberPage from "@/components/member-page"
 
 const Member = () => {
   return (
-    <div>Member</div>
+    <div>
+      <MemberPage />
+    </div>
   )
 }
 
