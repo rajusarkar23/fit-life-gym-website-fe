@@ -18,40 +18,20 @@ interface User {
   isUserLogedIn: boolean;
   isError: boolean;
   isResponseOkay: boolean;
-  memberProfile: MemberProfile[] | null;
+  memberProfile: MemberProfile[];
   errorMessage: string | null;
   username: string | null;
-  signup: ({
-    name,
-    email,
-    password,
-  }: {
-    name: string;
-    email: string;
-    password: string;
-  }) => Promise<void>;
-  signin: ({
-    email,
-    password,
-  }: {
-    email: string;
-    password: string;
-  }) => Promise<void>;
-  verify: ({
-    otp,
-    authCookie,
-  }: {
-    otp: string;
-    authCookie: string;
-  }) => Promise<void>;
-  getProfile: ({
-    userName,
-    authCookie,
-  }: {
-    userName: string;
-    authCookie: string;
-  }) => Promise<void>;
+  // signup func
+  signup: ({ name, email, password}: { name: string; email: string; password:string;}) => Promise<void>;
+  // signin func
+  signin: ({email, password}: {email: string; password: string;}) =>Promise<void>;
+  // verify func
+  verify: ({otp, authCookie}: {otp: string; authCookie: string;}) => Promise<void>;
+  // get profile func
+  getProfile: ({userName,authCookie}: {userName: string;authCookie: string;}) => Promise<void>;
+  // upate user name func
   updateUserName: ({newUserName, authCookie}: {newUserName: string, authCookie: string}) => Promise<void>
+  updateName: ({authCookie, newName}: {authCookie: string, newName: string}) => Promise<void>
 }
 
 const useUserStore = create(
@@ -63,7 +43,7 @@ const useUserStore = create(
       isResponseOkay: false,
       errorMessage: null,
       username: null,
-      memberProfile: null,
+      memberProfile: [],
       // signinup
       signup: async ({ email, name, password }) => {
         set({
@@ -264,7 +244,7 @@ const useUserStore = create(
           isError: false,
           errorMessage: null,
           isResponseOkay: false,
-          memberProfile: null,
+          memberProfile: [],
         });
 
         try {
@@ -290,7 +270,7 @@ const useUserStore = create(
               set({
                 isError: true,
                 isResponseOkay: false,
-                memberProfile: null,
+                memberProfile: [],
                 errorMessage: error.response.data.message,
               });
             });
@@ -299,7 +279,7 @@ const useUserStore = create(
           set({
             isError: true,
             isResponseOkay: false,
-            memberProfile: null,
+            memberProfile: [],
             errorMessage: "Something went wrong",
           });
         }
@@ -334,7 +314,36 @@ const useUserStore = create(
             console.log(error);
             set({username: null, isLoading: false, isError: true, errorMessage: "Something went wrong", isResponseOkay: false})
           }
-      }
+      },
+      updateName: async ({authCookie, newName}) => {
+        set({isLoading: true, isError: false, errorMessage: null,isResponseOkay: false})
+
+        try {
+          await axios
+            .put(
+              `${NEXT_PUBLIC_BACKEND_URL}/member/profile/update-name`,
+              {
+                newName,
+              },
+              {
+                headers: {
+                  Authorization: authCookie,
+                },
+              }
+            )
+            .then((response) => {
+              if (response.data.success) {
+                set({isLoading: false, isError: false, errorMessage: null, isResponseOkay: true})
+              }
+            })
+            .catch((error) => {
+              set({memberProfile: [], isLoading: false, isError: true, errorMessage: error.response.data.message, isResponseOkay: false})
+            });
+        } catch (error) {
+          console.log(error);
+          set({memberProfile: [], isLoading: false, isError: true, errorMessage: "Something went wrong", isResponseOkay: false})
+        }
+    },
     }),
     { name: "userStore" }
   )
