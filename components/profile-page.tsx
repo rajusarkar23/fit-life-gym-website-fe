@@ -1,7 +1,7 @@
 "use client";
 
 import { useUserStore } from "@/store/user-store";
-import { LoaderCircle, SquarePen } from "lucide-react";
+import { CirclePlus, LoaderCircle, Send, SquarePen } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,7 +17,24 @@ import {
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
+import { Textarea } from "./ui/textarea";
+import axios from "axios";
+import { NEXT_PUBLIC_BACKEND_URL } from "@/lib/config";
 
+interface Image {
+  imageUrl: string | null
+}
+
+// edit username
 function EditUserNameDialog({
   currentUserName,
   cookie,
@@ -88,6 +105,7 @@ function EditUserNameDialog({
   );
 }
 
+// edit name
 function EditNameDialog({
   currentName,
   cookie,
@@ -166,6 +184,61 @@ function EditNameDialog({
   );
 }
 
+// create a post
+function CreatePost({ authToken }: { authToken: string }) {
+  const [textContent, setTextContent] = useState("");
+  // const [imageUrl, setImageUrl] = useState();
+
+  const {createPost} = useUserStore()
+
+  return (
+    <div className="flex justify-center">
+      <Sheet>
+        <SheetTrigger className="dark:bg-secondary bg-primary w-48 rounded h-8 flex items-center justify-center text-white">
+          <CirclePlus size={20} className="mr-1" /> Create a new post
+        </SheetTrigger>
+        <SheetContent side={"left"}>
+          <SheetHeader>
+            <SheetTitle>Are you absolutely sure?</SheetTitle>
+            <SheetDescription>
+              This action cannot be undone. This will permanently delete your
+              account and remove your data from our servers.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="bottom-0 fixed w-80 space-y-3 mb-2">
+            <div className="space-y-3">
+              <div>
+              <Label htmlFor="textContent" className="text-gray-900">Type</Label>
+              <Textarea
+                placeholder="Type here"
+                onChange={(e) => setTextContent(e.target.value)}
+                />
+                </div>
+              <div>
+                <Label htmlFor="imageUrl" className="text-gray-900">{`Upload image(optional)`}</Label>
+                <Input type="file" />
+              </div>
+            </div>
+            <div>
+              {useUserStore.getState().isError && (<p className="text-sm text-red-500 font-semibold">Error: {useUserStore.getState().errorMessage}</p>)}
+            </div>
+            <div>
+              <Button
+                className="w-24"
+                onClick={async () => {
+                  await createPost({authCookie: authToken, textContent})
+                }}
+              >
+                <Send />
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}
+
 export default function ProfilePage({ cookie }: { cookie: string }) {
   const router = useRouter();
   if (useUserStore.getState().errorMessage === "No member found.") {
@@ -198,52 +271,54 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
   }
 
   return (
-  <div>
-    {
-      useUserStore.getState().memberProfile.length === 0 ? (<div className="flex justify-center min-h-[70vh]">
-        <LoaderCircle color="#873636" className="animate-spin" />
-      </div>): (
-
+    <div>
+      {useUserStore.getState().memberProfile.length === 0 ? (
+        <div className="flex justify-center min-h-[70vh]">
+          <LoaderCircle color="#873636" className="animate-spin" />
+        </div>
+      ) : (
         <div className="flex justify-center items-center min-h-[30vh]">
-        <div>
-          {/* Profile image section */}
-          <div className="flex justify-center items-center">
-            <Image
-              src={useUserStore.getState().memberProfile[0].imageUrl!}
-              width={100}
-              height={100}
-              alt={useUserStore.getState().memberProfile[0].userName!}
-              className="rounded-full"
-            />
-          </div>
-          {/* Profile details section */}
-          <div className="mt-4">
-            <div className="flex items-center justify-center">
-              <p className="font-semibold text-3xl">
-                {useUserStore.getState().memberProfile[0].name}
-              </p>
-              <EditNameDialog
-                cookie={cookie}
-                currentName={useUserStore.getState().memberProfile[0].name!}
+          <div>
+            {/* Profile image section */}
+            <div className="flex justify-center items-center">
+              <Image
+                src={useUserStore.getState().memberProfile[0].imageUrl!}
+                width={100}
+                height={100}
+                alt={useUserStore.getState().memberProfile[0].userName!}
+                className="rounded-full"
               />
             </div>
-            <div className="flex items-center justify-center">
-              <p className="font-semibold text-gray-300">
-                {useUserStore.getState().memberProfile[0].userName}
-              </p>
-              <EditUserNameDialog
-                cookie={cookie}
-                currentUserName={
-                  useUserStore.getState().memberProfile[0].userName!
-                }
-              />
+            {/* Profile details section */}
+            <div className="mt-4">
+              <div className="flex items-center justify-center">
+                <p className="font-semibold text-3xl">
+                  {useUserStore.getState().memberProfile[0].name}
+                </p>
+                <EditNameDialog
+                  cookie={cookie}
+                  currentName={useUserStore.getState().memberProfile[0].name!}
+                />
+              </div>
+              <div className="flex items-center justify-center">
+                <p className="font-semibold text-gray-300">
+                  {useUserStore.getState().memberProfile[0].userName}
+                </p>
+                <EditUserNameDialog
+                  cookie={cookie}
+                  currentUserName={
+                    useUserStore.getState().memberProfile[0].userName!
+                  }
+                />
+              </div>
+
+              <div>
+                <CreatePost authToken={cookie} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      )
-    }
-  </div>
-  
-  )
+      )}
+    </div>
+  );
 }

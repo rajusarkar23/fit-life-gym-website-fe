@@ -20,6 +20,7 @@ interface User {
   isResponseOkay: boolean;
   memberProfile: MemberProfile[];
   errorMessage: string | null;
+  postImageUrl: string | null;
   username: string | null;
   // signup func
   signup: ({ name, email, password}: { name: string; email: string; password:string;}) => Promise<void>;
@@ -32,6 +33,8 @@ interface User {
   // upate user name func
   updateUserName: ({newUserName, authCookie}: {newUserName: string, authCookie: string}) => Promise<void>
   updateName: ({authCookie, newName}: {authCookie: string, newName: string}) => Promise<void>
+  // create post func
+  createPost: ({textContent, authCookie}: {textContent: string, authCookie: string}) => Promise<void>
 }
 
 const useUserStore = create(
@@ -42,6 +45,7 @@ const useUserStore = create(
       isUserLogedIn: false,
       isResponseOkay: false,
       errorMessage: null,
+      postImageUrl: null,
       username: null,
       memberProfile: [],
       // signinup
@@ -344,6 +348,36 @@ const useUserStore = create(
           set({memberProfile: [], isLoading: false, isError: true, errorMessage: "Something went wrong", isResponseOkay: false})
         }
     },
+    createPost: async ({authCookie, textContent}) => {
+      set({isLoading: true, isError: false, errorMessage: null, isResponseOkay: false})
+      try {
+        axios.post(
+          `${NEXT_PUBLIC_BACKEND_URL}/member/post/create`,
+          {
+            textContent,
+            imageUrl: useUserStore.getState().postImageUrl,
+          },
+          {
+            headers: {
+              Authorization: authCookie,
+            },
+          }
+        ).then((response) => {
+          console.log(response);
+
+          if (response.data.success) {
+            set({isLoading: false, isError: false, isResponseOkay: true})
+          }
+          
+        }).catch((error) => {
+          set({isLoading: false, isError: true, errorMessage:error.response.data.message})
+        })
+      } catch (error) {
+        console.log(error);
+        set({isLoading: false, isError: true, errorMessage:"Something went wrong."})
+      }
+
+    }
     }),
     { name: "userStore" }
   )
