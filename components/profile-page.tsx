@@ -1,7 +1,14 @@
 "use client";
 
 import { useUserStore } from "@/store/user-store";
-import { CirclePlus, LoaderCircle, Send, SquarePen } from "lucide-react";
+import {
+  CheckCircle,
+  CircleCheck,
+  CirclePlus,
+  LoaderCircle,
+  Send,
+  SquarePen,
+} from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -19,6 +26,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -29,11 +37,6 @@ import {
 import { Textarea } from "./ui/textarea";
 import axios from "axios";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/lib/config";
-
-interface Image {
-  imageUrl: string | null
-}
-
 // edit username
 function EditUserNameDialog({
   currentUserName,
@@ -187,51 +190,166 @@ function EditNameDialog({
 // create a post
 function CreatePost({ authToken }: { authToken: string }) {
   const [textContent, setTextContent] = useState("");
-  // const [imageUrl, setImageUrl] = useState();
+  const [postImageUrl, setPostImageUrl] = useState("");
+  const [fileUploading, setFileUploading] = useState(false);
+  const [isFileUploadSuccess, setIsFileUploadSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isPostCreationSuccess, setIsPostCreationSuccess] = useState(false);
+  const [isPostCreating, setIspostCreating] = useState(false);
 
-  const {createPost} = useUserStore()
+  const { fetchPosts } = useUserStore();
 
   return (
     <div className="flex justify-center">
       <Sheet>
-        <SheetTrigger className="dark:bg-secondary bg-primary w-48 rounded h-8 flex items-center justify-center text-white">
+        <SheetTrigger
+          className="dark:bg-secondary bg-primary w-48 rounded h-8 flex items-center justify-center text-white"
+          onClick={() => {
+            setIsPostCreationSuccess(false);
+          }}
+        >
           <CirclePlus size={20} className="mr-1" /> Create a new post
         </SheetTrigger>
         <SheetContent side={"left"}>
           <SheetHeader>
-            <SheetTitle>Are you absolutely sure?</SheetTitle>
+            <SheetTitle>
+              Write down your post and upload an image below.
+            </SheetTitle>
             <SheetDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers.
+              {isFileUploadSuccess && (
+                <Image
+                  src={postImageUrl}
+                  alt="post_image"
+                  height={400}
+                  width={400}
+                  className="rounded"
+                />
+              )}
             </SheetDescription>
           </SheetHeader>
-          <div className="bottom-0 fixed w-80 space-y-3 mb-2">
+          <div className="w-80 space-y-3 mb-2">
             <div className="space-y-3">
-              <div>
-              <Label htmlFor="textContent" className="text-gray-900">Type</Label>
-              <Textarea
-                placeholder="Type here"
-                onChange={(e) => setTextContent(e.target.value)}
+              <div className="space-y-1">
+                <Label
+                  htmlFor="textContent"
+                  className="text-secondary dark:text-primary"
+                >
+                  Start typing
+                </Label>
+                <Textarea
+                  placeholder="Type here"
+                  onChange={(e) => setTextContent(e.target.value)}
                 />
-                </div>
+              </div>
               <div>
-                <Label htmlFor="imageUrl" className="text-gray-900">{`Upload image(optional)`}</Label>
-                <Input type="file" />
+                <Label
+                  htmlFor="imageUrl"
+                  className="text-secondary dark:text-primary"
+                >{`Upload image(optional)`}</Label>
+                <Input
+                  type="file"
+                  id="file"
+                  name="file"
+                  onChange={async (e) => {
+                    setFileUploading(true);
+                    setIsFileUploadSuccess(false);
+                    setIsError(false);
+                    setPostImageUrl("");
+
+                    const file = e.target.files?.[0];
+                    const formData = new FormData();
+                    formData.append("file", file!);
+                    try {
+                      await axios
+                        .post(
+                          `${NEXT_PUBLIC_BACKEND_URL}/member/post/upload-post-image`,
+                          formData
+                        )
+                        .then((response) => {
+                          console.log(response);
+                          if (response.data.success) {
+                            setFileUploading(false);
+                            setIsFileUploadSuccess(true);
+                            setPostImageUrl(response.data.fileUrl);
+                          }
+                        })
+                        .catch((error) => {
+                          setFileUploading(false);
+                          setIsError(true);
+                          setIsFileUploadSuccess(false);
+                          setErrorMessage("error.response.message");
+                        });
+                    } catch (error) {
+                      console.log(error);
+                      setIsError(true);
+                      setErrorMessage(
+                        "Something went wrong, please try again."
+                      );
+                    }
+                  }}
+                />
+                {fileUploading && <LoaderCircle className="animate-spin" />}
+                {isFileUploadSuccess && (
+                  <p className="flex items-center text-green-700">
+                    Uploaded <CircleCheck size={20} className="ml-1" />
+                  </p>
+                )}
               </div>
             </div>
             <div>
-              {useUserStore.getState().isError && (<p className="text-sm text-red-500 font-semibold">Error: {useUserStore.getState().errorMessage}</p>)}
+              {useUserStore.getState().isError && (
+                <p className="text-sm text-red-500 font-semibold">
+                  Error: {useUserStore.getState().errorMessage}
+                </p>
+              )}
             </div>
-            <div>
-              <Button
-                className="w-24"
-                onClick={async () => {
-                  await createPost({authCookie: authToken, textContent})
-                }}
-              >
-                <Send />
-              </Button>
-            </div>
+            <Button
+              className="w-24"
+              onClick={async () => {
+                setIsPostCreationSuccess(false);
+                setIspostCreating(true);
+                try {
+                  await axios
+                    .post(
+                      `${NEXT_PUBLIC_BACKEND_URL}/member/post/create`,
+                      {
+                        textContent,
+                        postImageUrl,
+                      },
+                      {
+                        headers: {
+                          Authorization: authToken,
+                        },
+                      }
+                    )
+                    .then((res) => {
+                      if (res.data.success) {
+                        setIsPostCreationSuccess(true);
+                        setIspostCreating(false);
+                        fetchPosts({ authCookie: authToken });
+                      }
+                    })
+                    .catch((err) => {
+                      console.log(err);
+                    });
+                } catch (error) {
+                  console.log(error);
+                }
+              }}
+            >
+              Post
+              <Send />
+            </Button>
+            {isPostCreating && <LoaderCircle className="animate-spin" />}
+
+            {isPostCreationSuccess && (
+              <p className="text-xs font-semibold text-green-700 flex">
+                {" "}
+                <CheckCircle className="mr-1" size={15} />
+                Post created successfully, you can close this window.
+              </p>
+            )}
           </div>
         </SheetContent>
       </Sheet>
@@ -247,7 +365,7 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
 
   const params = useParams();
   const [loading, setLoadign] = useState(true);
-  const { getProfile } = useUserStore();
+  const { getProfile, fetchPosts } = useUserStore();
 
   const getProfiledetails = async () => {
     setLoadign(true);
@@ -260,6 +378,7 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
 
   useEffect(() => {
     getProfiledetails();
+    fetchPosts({ authCookie: cookie });
   }, []);
 
   if (loading) {
@@ -319,6 +438,70 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
           </div>
         </div>
       )}
+
+      {/* show posts */}
+      <div className="flex flex-col items-center space-y-2">
+        {useUserStore.getState().postsCreatedByLogedinMember.length > 0 &&
+          useUserStore.getState().postsCreatedByLogedinMember.map((post) => (
+            <div
+              key={post.id!}
+              className="border w-[500px] px-4 rounded py-4 bg-gray-100 shadow-lg"
+            >
+              {/* show creator profile image,name and timestamp */}
+              <div className="flex flex-row items-center">
+                {/* creator image */}
+                <div>
+                  <Image
+                    src={post.createImageUrl}
+                    alt="creator_image"
+                    width={60}
+                    height={60}
+                    className="rounded-full"
+                  />
+                </div>
+                {/* name plus time */}
+                <div>
+                  <p className="text-sm font-semibold">{post.postCreator}</p>
+                  <p className="text-xs font-semibold text-gray-700">
+                    {new Date(post.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              </div>
+              <div className="px-2 space-y-2">
+                    <div className="text-xl">
+                      <p className="font-extralight">{post.textContent}</p>
+                    </div>
+                    <div>
+                      {
+                        post.postImageUrl?.length! > 0 && (<Image src={post.postImageUrl!} alt="post_image" width={500} height={500}
+                        className="rounded"
+                        />)
+                      }
+                    </div>
+              </div>
+
+              <div>
+                <Button
+                onClick={async() => {
+                    await axios.post(`${NEXT_PUBLIC_BACKEND_URL}/member/post/like/add`, {
+                      post: `${post.id}`
+                    }, {
+                      headers: {
+                        Authorization: cookie
+                      }
+                    })
+                }}
+                >Like</Button>
+              </div>
+            </div>
+          ))}
+      </div>
     </div>
   );
 }

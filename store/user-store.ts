@@ -13,28 +13,87 @@ interface MemberProfile {
   dob: string | null;
 }
 
+interface Post {
+  id: number | null;
+  textContent: string | null;
+  postImageUrl: string | null;
+  createdAt: string;
+  postCreator: string;
+  createImageUrl: string;
+}
+
+interface SpacePosts {
+  id:number,
+  text:string,
+  image: string
+  likeBy: number,
+  likeFor: number
+}
+
 interface User {
   isLoading: boolean;
   isUserLogedIn: boolean;
   isError: boolean;
   isResponseOkay: boolean;
+  fetchFor: number | null;
   memberProfile: MemberProfile[];
+  postsCreatedByLogedinMember: Post[];
+  spacePosts: SpacePosts[] 
   errorMessage: string | null;
-  postImageUrl: string | null;
   username: string | null;
   // signup func
-  signup: ({ name, email, password}: { name: string; email: string; password:string;}) => Promise<void>;
+  signup: ({
+    name,
+    email,
+    password,
+  }: {
+    name: string;
+    email: string;
+    password: string;
+  }) => Promise<void>;
   // signin func
-  signin: ({email, password}: {email: string; password: string;}) =>Promise<void>;
+  signin: ({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) => Promise<void>;
   // verify func
-  verify: ({otp, authCookie}: {otp: string; authCookie: string;}) => Promise<void>;
+  verify: ({
+    otp,
+    authCookie,
+  }: {
+    otp: string;
+    authCookie: string;
+  }) => Promise<void>;
   // get profile func
-  getProfile: ({userName,authCookie}: {userName: string;authCookie: string;}) => Promise<void>;
+  getProfile: ({
+    userName,
+    authCookie,
+  }: {
+    userName: string;
+    authCookie: string;
+  }) => Promise<void>;
   // upate user name func
-  updateUserName: ({newUserName, authCookie}: {newUserName: string, authCookie: string}) => Promise<void>
-  updateName: ({authCookie, newName}: {authCookie: string, newName: string}) => Promise<void>
-  // create post func
-  createPost: ({textContent, authCookie}: {textContent: string, authCookie: string}) => Promise<void>
+  updateUserName: ({
+    newUserName,
+    authCookie,
+  }: {
+    newUserName: string;
+    authCookie: string;
+  }) => Promise<void>;
+  updateName: ({
+    authCookie,
+    newName,
+  }: {
+    authCookie: string;
+    newName: string;
+  }) => Promise<void>;
+  // fetch post func
+  fetchPosts: ({ authCookie }: { authCookie: string }) => Promise<void>;
+  // fetch posts in space
+  fetchSpacePosts: ({ authCookie }: { authCookie: string }) => Promise<void>;
 }
 
 const useUserStore = create(
@@ -44,10 +103,12 @@ const useUserStore = create(
       isError: false,
       isUserLogedIn: false,
       isResponseOkay: false,
+      fetchFor: null,
       errorMessage: null,
-      postImageUrl: null,
       username: null,
       memberProfile: [],
+      spacePosts: [],
+      postsCreatedByLogedinMember: [],
       // signinup
       signup: async ({ email, name, password }) => {
         set({
@@ -289,38 +350,68 @@ const useUserStore = create(
         }
       },
       // update username
-      updateUserName: async ({authCookie, newUserName}) => {
-          set({username: null, isLoading: true,isError: false, errorMessage: null,isResponseOkay: false})
+      updateUserName: async ({ authCookie, newUserName }) => {
+        set({
+          username: null,
+          isLoading: true,
+          isError: false,
+          errorMessage: null,
+          isResponseOkay: false,
+        });
 
-          try {
-            await axios
-              .put(
-                `${NEXT_PUBLIC_BACKEND_URL}/member/profile/update-username`,
-                {
-                  newUserName,
+        try {
+          await axios
+            .put(
+              `${NEXT_PUBLIC_BACKEND_URL}/member/profile/update-username`,
+              {
+                newUserName,
+              },
+              {
+                headers: {
+                  Authorization: authCookie,
                 },
-                {
-                  headers: {
-                    Authorization: authCookie,
-                  },
-                }
-              )
-              .then((response) => {
-                console.log(response.data);
-                if (response.data.success) {
-                  set({username: response.data.username, isLoading: false, isError: false, errorMessage: null, isResponseOkay: true})
-                }
-              })
-              .catch((error) => {
-                set({username: null, isLoading: false, isError: true, errorMessage: error.response.data.message, isResponseOkay: false})
+              }
+            )
+            .then((response) => {
+              console.log(response.data);
+              if (response.data.success) {
+                set({
+                  username: response.data.username,
+                  isLoading: false,
+                  isError: false,
+                  errorMessage: null,
+                  isResponseOkay: true,
+                });
+              }
+            })
+            .catch((error) => {
+              set({
+                username: null,
+                isLoading: false,
+                isError: true,
+                errorMessage: error.response.data.message,
+                isResponseOkay: false,
               });
-          } catch (error) {
-            console.log(error);
-            set({username: null, isLoading: false, isError: true, errorMessage: "Something went wrong", isResponseOkay: false})
-          }
+            });
+        } catch (error) {
+          console.log(error);
+          set({
+            username: null,
+            isLoading: false,
+            isError: true,
+            errorMessage: "Something went wrong",
+            isResponseOkay: false,
+          });
+        }
       },
-      updateName: async ({authCookie, newName}) => {
-        set({isLoading: true, isError: false, errorMessage: null,isResponseOkay: false})
+      // update name
+      updateName: async ({ authCookie, newName }) => {
+        set({
+          isLoading: true,
+          isError: false,
+          errorMessage: null,
+          isResponseOkay: false,
+        });
 
         try {
           await axios
@@ -337,47 +428,79 @@ const useUserStore = create(
             )
             .then((response) => {
               if (response.data.success) {
-                set({isLoading: false, isError: false, errorMessage: null, isResponseOkay: true})
+                set({
+                  isLoading: false,
+                  isError: false,
+                  errorMessage: null,
+                  isResponseOkay: true,
+                });
               }
             })
             .catch((error) => {
-              set({memberProfile: [], isLoading: false, isError: true, errorMessage: error.response.data.message, isResponseOkay: false})
+              set({
+                memberProfile: [],
+                isLoading: false,
+                isError: true,
+                errorMessage: error.response.data.message,
+                isResponseOkay: false,
+              });
             });
         } catch (error) {
           console.log(error);
-          set({memberProfile: [], isLoading: false, isError: true, errorMessage: "Something went wrong", isResponseOkay: false})
+          set({
+            memberProfile: [],
+            isLoading: false,
+            isError: true,
+            errorMessage: "Something went wrong",
+            isResponseOkay: false,
+          });
         }
-    },
-    createPost: async ({authCookie, textContent}) => {
-      set({isLoading: true, isError: false, errorMessage: null, isResponseOkay: false})
-      try {
-        axios.post(
-          `${NEXT_PUBLIC_BACKEND_URL}/member/post/create`,
-          {
-            textContent,
-            imageUrl: useUserStore.getState().postImageUrl,
-          },
-          {
-            headers: {
-              Authorization: authCookie,
-            },
-          }
-        ).then((response) => {
-          console.log(response);
+      },
+      // fetch post for particular user
+      fetchPosts: async ({ authCookie }) => {
+        set({ isLoading: true, postsCreatedByLogedinMember: [] });
 
-          if (response.data.success) {
-            set({isLoading: false, isError: false, isResponseOkay: true})
-          }
-          
-        }).catch((error) => {
-          set({isLoading: false, isError: true, errorMessage:error.response.data.message})
-        })
-      } catch (error) {
-        console.log(error);
-        set({isLoading: false, isError: true, errorMessage:"Something went wrong."})
-      }
+        try {
+          await axios
+            .get(`${NEXT_PUBLIC_BACKEND_URL}/member/post/get-posts`, {
+              headers: {
+                Authorization: authCookie,
+              },
+            })
+            .then((res) => {
+              console.log(res);
+              set({
+                isLoading: false,
+                postsCreatedByLogedinMember: res.data.posts,
+              });
+            });
+        } catch (error) {}
+      },
+      // fetch post for home/space
+      fetchSpacePosts: async ({ authCookie }) => {
+        set({ fetchFor: null });
 
-    }
+        try {
+          await axios
+            .get(`${NEXT_PUBLIC_BACKEND_URL}/member/post/get-home-posts`, {
+              headers: {
+                Authorization: authCookie,
+              },
+            })
+            .then((res) => {
+              console.log(res);
+
+              if (res.data.success) {
+                set({fetchFor: res.data.fetchFor, spacePosts: res.data.posts})
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        } catch (error) {
+          console.log(error);
+        }
+      },
     }),
     { name: "userStore" }
   )
