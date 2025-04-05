@@ -5,6 +5,7 @@ import {
   CheckCircle,
   CircleCheck,
   CirclePlus,
+  Heart,
   LoaderCircle,
   Send,
   SquarePen,
@@ -26,10 +27,8 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -37,6 +36,14 @@ import {
 import { Textarea } from "./ui/textarea";
 import axios from "axios";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/lib/config";
+
+interface Like {
+  id: number;
+}
+interface Dislike {
+  id: number;
+}
+
 // edit username
 function EditUserNameDialog({
   currentUserName,
@@ -130,11 +137,6 @@ function EditNameDialog({
       authCookie: cookie,
       userName: params.username?.toString()!,
     });
-
-    // if (useUserStore.getState().isResponseOkay) {
-    //   router.push(`/space/profile/${useUserStore.getState().username}`)
-    // }
-
     router.refresh();
   };
 
@@ -367,6 +369,12 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
   const [loading, setLoadign] = useState(true);
   const { getProfile, fetchPosts } = useUserStore();
 
+  // array of likes
+  const [likeArray, setLikeArray] = useState<Like[]>([]);
+  // array disliked
+  const [dislikeArray, setDislikeArray] = useState<Dislike[]>([]);
+  console.log(dislikeArray);
+
   const getProfiledetails = async () => {
     setLoadign(true);
     await getProfile({
@@ -474,30 +482,100 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
                 </div>
               </div>
               <div className="px-2 space-y-2">
-                    <div className="text-xl">
-                      <p className="font-extralight">{post.textContent}</p>
-                    </div>
-                    <div>
-                      {
-                        post.postImageUrl?.length! > 0 && (<Image src={post.postImageUrl!} alt="post_image" width={500} height={500}
-                        className="rounded"
-                        />)
-                      }
-                    </div>
+                <div className="text-xl">
+                  <p className="font-extralight">{post.textContent}</p>
+                </div>
+                <div>
+                  {post.postImageUrl?.length! > 0 && (
+                    <Image
+                      src={post.postImageUrl!}
+                      alt="post_image"
+                      width={500}
+                      height={500}
+                      className="rounded"
+                    />
+                  )}
+                </div>
               </div>
 
-              <div>
-                <Button
-                onClick={async() => {
-                    await axios.post(`${NEXT_PUBLIC_BACKEND_URL}/member/post/like/add`, {
-                      post: `${post.id}`
-                    }, {
-                      headers: {
-                        Authorization: cookie
+              <div className="mt-4 pl-2 border rounded-full h-10 items-center flex">
+                {/* if already like available */}
+                {typeof post.likeBy === "number" ? (
+                  <Heart
+                    className={
+                      dislikeArray.some((dislike) => dislike.id === post.id)
+                        ? "fill-white text-red-400 hover:scale-125 hover:cursor-pointer transition-all"
+                        : "fill-red-400 text-white hover:scale-125 hover:cursor-pointer transition-all"
+                    }
+                    onClick={async () => {
+                      setDislikeArray((prev) => {
+                        if (prev.some((dislike) => dislike.id === post.id)) {
+                          // if exists only accept those, whose are not matched
+                          return prev.filter(
+                            (dislike) => dislike.id !== post.id
+                          );
+                        } else {
+                          // add the new item/dislike
+                          console.log("else ran");
+
+                          return [...prev, { id: post.id! }];
+                        }
+                      });
+
+                      try {
+                        await axios.post(
+                          `${NEXT_PUBLIC_BACKEND_URL}/member/post/like/manage`,
+                          {
+                            post: post.id,
+                          },
+                          {
+                            headers: {
+                              Authorization: cookie,
+                            },
+                          }
+                        );
+                      } catch (error) {
+                        console.log(error);
                       }
-                    })
-                }}
-                >Like</Button>
+                    }}
+                  />
+                ) : (
+                  <Heart
+                    className={
+                      likeArray.some((like) => like.id === post.id)
+                        ? "fill-red-400 text-white hover:scale-125 hover:cursor-pointer transition-all"
+                        : "fill-white text-red-400 hover:scale-125 hover:cursor-pointer transition-all"
+                    }
+                    onClick={async () => {
+                      setLikeArray((prev) => {
+                        // check if like exists
+                        if (prev.some((like) => like.id === post.id)) {
+                          // if exists only accept those, whose are not matched
+                          return prev.filter((like) => like.id !== post.id);
+                        } else {
+                          // add the new item/like
+                          return [...prev, { id: post.id! }];
+                        }
+                      });
+
+                      try {
+                        await axios.post(
+                          `${NEXT_PUBLIC_BACKEND_URL}/member/post/like/manage`,
+                          {
+                            post: post.id,
+                          },
+                          {
+                            headers: {
+                              Authorization: cookie,
+                            },
+                          }
+                        );
+                      } catch (error) {
+                        console.log(error);
+                      }
+                    }}
+                  />
+                )}
               </div>
             </div>
           ))}

@@ -13,6 +13,10 @@ interface MemberProfile {
   dob: string | null;
 }
 
+interface LikeArray {
+  "id": number
+}
+
 interface Post {
   id: number | null;
   textContent: string | null;
@@ -20,14 +24,16 @@ interface Post {
   createdAt: string;
   postCreator: string;
   createImageUrl: string;
+  likeBy: number;
+  likeFor: number;
 }
 
 interface SpacePosts {
-  id:number,
-  text:string,
-  image: string
-  likeBy: number,
-  likeFor: number
+  id: number;
+  text: string;
+  image: string;
+  likeBy: number;
+  likeFor: number;
 }
 
 interface User {
@@ -38,7 +44,8 @@ interface User {
   fetchFor: number | null;
   memberProfile: MemberProfile[];
   postsCreatedByLogedinMember: Post[];
-  spacePosts: SpacePosts[] 
+  spacePosts: SpacePosts[];
+  likeArr: LikeArray[]
   errorMessage: string | null;
   username: string | null;
   // signup func
@@ -107,6 +114,7 @@ const useUserStore = create(
       errorMessage: null,
       username: null,
       memberProfile: [],
+      likeArr: [],
       spacePosts: [],
       postsCreatedByLogedinMember: [],
       // signinup
@@ -373,7 +381,6 @@ const useUserStore = create(
               }
             )
             .then((response) => {
-              console.log(response.data);
               if (response.data.success) {
                 set({
                   username: response.data.username,
@@ -458,7 +465,11 @@ const useUserStore = create(
       },
       // fetch post for particular user
       fetchPosts: async ({ authCookie }) => {
-        set({ isLoading: true, postsCreatedByLogedinMember: [] });
+        set({
+          isLoading: true,
+          postsCreatedByLogedinMember: [],
+          fetchFor: null,
+        });
 
         try {
           await axios
@@ -468,10 +479,10 @@ const useUserStore = create(
               },
             })
             .then((res) => {
-              console.log(res);
               set({
                 isLoading: false,
                 postsCreatedByLogedinMember: res.data.posts,
+                fetchFor: res.data.fetchFor,
               });
             });
         } catch (error) {}
@@ -488,10 +499,11 @@ const useUserStore = create(
               },
             })
             .then((res) => {
-              console.log(res);
-
               if (res.data.success) {
-                set({fetchFor: res.data.fetchFor, spacePosts: res.data.posts})
+                set({
+                  fetchFor: res.data.fetchFor,
+                  spacePosts: res.data.posts,
+                });
               }
             })
             .catch((err) => {
