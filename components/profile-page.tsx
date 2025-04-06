@@ -52,6 +52,7 @@ interface Comment {
   commentFor: number;
   commentByName: string;
   commentByUserId: number;
+  userProfileUrl: string;
 }
 
 // edit username
@@ -369,9 +370,6 @@ function CreatePost({ authToken }: { authToken: string }) {
   );
 }
 
-
-
-
 // add comment
 function AddComment({
   authToken,
@@ -392,8 +390,6 @@ function AddComment({
             const isCommentAvailable = useUserStore
               .getState()
               .fetchComment.filter((comm) => comm.commentFor === postId);
-            console.log(isCommentAvailable);
-            
             setCommentArray(isCommentAvailable);
           }}
           className="text-red-400 hover:scale-125 transition-all hover:cursor-pointer"
@@ -410,8 +406,23 @@ function AddComment({
               <p>This post has no comments yet</p>
             ) : (
               commentArray.map((comm, index) => (
-                <div key={index}>
-                  <p>{comm.comment}</p>
+                <div key={index} className="flex items-center space-y-2">
+                  <div className="mt-1.5">
+                    <Image
+                      src={comm.userProfileUrl}
+                      alt="profile_image"
+                      width={40}
+                      height={35}
+                    />
+                  </div>
+                  <div className="bg-gray-200 h-8 w-96 rounded-full px-6 flex items-center">
+                    <p>
+                      <span className="text-blue-600">
+                        {comm.commentByName}
+                      </span>
+                      <span> {comm.comment}</span>
+                    </p>
+                  </div>
                 </div>
               ))
             )}
@@ -434,7 +445,9 @@ function AddComment({
                 commentFor: postId,
                 commentByName: useUserStore.getState().memberProfile[0].name!,
                 commentByUserId: 0,
-                id: 0
+                id: 0,
+                userProfileUrl:
+                  useUserStore.getState().memberProfile[0].imageUrl!,
               });
               const isCommentAvailable = useUserStore
                 .getState()
@@ -486,7 +499,7 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
     getProfiledetails();
     fetchPosts({ authCookie: cookie });
     fetchLikes({ ids });
-    fetchComments({ ids });
+    fetchComments({ ids, authCookie: cookie });
   }, []);
 
   function GetLikeLengthAndCommentLength({ id }: { id: number }) {
@@ -569,10 +582,10 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
           useUserStore.getState().postsCreatedByLogedinMember.map((post) => (
             <div
               key={post.id!}
-              className="border w-[500px] px-4 rounded py-4 bg-gray-100 shadow-lg"
+              className="border w-[500px] px-4 rounded py-4 bg-gray- dark:bg-slate-900 shadow-lg"
             >
               {/* show creator profile image,name and timestamp */}
-              <div className="flex flex-row items-center">
+              <div className="flex flex-row items-center gap-1">
                 {/* creator image */}
                 <div>
                   <Image
@@ -586,7 +599,7 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
                 {/* name plus time */}
                 <div>
                   <p className="text-sm font-semibold">{post.postCreator}</p>
-                  <p className="text-xs font-semibold text-gray-700">
+                  <p className="text-xs font-semibold text-gray-700 dark:text-gray-200">
                     {new Date(post.createdAt).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
@@ -621,7 +634,7 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
                     <Heart
                       className={
                         dislikeArray.some((dislike) => dislike.id === post.id)
-                          ? "fill-white text-red-400 hover:scale-125 hover:cursor-pointer transition-all"
+                          ? "text-red-400 hover:scale-125 hover:cursor-pointer transition-all"
                           : "fill-red-400 text-white hover:scale-125 hover:cursor-pointer transition-all"
                       }
                       onClick={async () => {
@@ -664,7 +677,7 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
                       className={
                         likeArray.some((like) => like.id === post.id)
                           ? "fill-red-400 text-white hover:scale-125 hover:cursor-pointer transition-all"
-                          : "fill-white text-red-400 hover:scale-125 hover:cursor-pointer transition-all"
+                          : "text-red-400 hover:scale-125 hover:cursor-pointer transition-all"
                       }
                       onClick={async () => {
                         setLikeArray((prev) => {

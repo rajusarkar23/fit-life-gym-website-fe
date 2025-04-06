@@ -29,6 +29,7 @@ interface FetchComment {
   commentFor: number;
   commentByName: string;
   commentByUserId: number;
+  userProfileUrl: string
 }
 
 interface Comment {
@@ -132,6 +133,7 @@ interface User {
     commentFor,
     comment,
     commentByUserId,
+    userProfileUrl,
     id,
   }: {
     authCookie: string;
@@ -140,6 +142,7 @@ interface User {
     commentByName: string;
     commentByUserId: number;
     id: number;
+    userProfileUrl: string
   }) => Promise<void>;
   fetchLikes: ({ ids }: { ids: number[] }) => Promise<void>;
   // manage likes
@@ -151,7 +154,7 @@ interface User {
     userId: number;
   }) => Promise<void>;
   // fetch comments
-  fetchComments: ({ ids }: { ids: number[] }) => Promise<void>;
+  fetchComments: ({ ids, authCookie }: { ids: number[], authCookie: string }) => Promise<void>;
 }
 
 const useUserStore = create(
@@ -576,6 +579,7 @@ const useUserStore = create(
         commentByUserId,
         comment,
         id,
+        userProfileUrl
       }) => {
         //set comment to the local storage
         set((state) => {
@@ -588,6 +592,7 @@ const useUserStore = create(
                 commentFor,
                 commentByName,
                 commentByUserId,
+                userProfileUrl,
               },
             ],
           };
@@ -653,7 +658,7 @@ const useUserStore = create(
           }
         });
       },
-      fetchComments: async ({ ids }) => {
+      fetchComments: async ({ ids,authCookie }) => {
         set({ fetchComment: [] });
         try {
           await axios
@@ -661,6 +666,10 @@ const useUserStore = create(
               `${NEXT_PUBLIC_BACKEND_URL}/member/post/comment/fetch-comments`,
               {
                 ids,
+              }, {
+                headers: {
+                  Authorization: authCookie
+                }
               }
             )
             .then((res) => {
