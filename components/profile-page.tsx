@@ -7,6 +7,7 @@ import {
   CirclePlus,
   Heart,
   LoaderCircle,
+  MessageCircleMore,
   Send,
   SquarePen,
 } from "lucide-react";
@@ -42,6 +43,13 @@ interface Like {
 }
 interface Dislike {
   id: number;
+}
+// comment types
+interface Comment {
+  commentFor: number;
+  commentByUserId: number;
+  commentByUserName: string;
+  comment: string;
 }
 
 // edit username
@@ -280,6 +288,7 @@ function CreatePost({ authToken }: { authToken: string }) {
                           setFileUploading(false);
                           setIsError(true);
                           setIsFileUploadSuccess(false);
+                          console.log(error);
                           setErrorMessage("error.response.message");
                         });
                     } catch (error) {
@@ -347,7 +356,6 @@ function CreatePost({ authToken }: { authToken: string }) {
 
             {isPostCreationSuccess && (
               <p className="text-xs font-semibold text-green-700 flex">
-                {" "}
                 <CheckCircle className="mr-1" size={15} />
                 Post created successfully, you can close this window.
               </p>
@@ -356,6 +364,94 @@ function CreatePost({ authToken }: { authToken: string }) {
         </SheetContent>
       </Sheet>
     </div>
+  );
+}
+
+// add comment
+function AddComment({
+  authToken,
+  postId,
+}: {
+  authToken: string;
+  postId: number;
+}) {
+  const [comment, setComment] = useState("");
+
+  const { addComment } = useUserStore();
+
+  const [commentArray, setCommentArray] = useState<Comment[]>([]);
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          onClick={() => {
+            const isCommentAvailable = useUserStore
+              .getState()
+              .comment.filter((comm) => comm.commentFor === postId);
+
+            console.log(isCommentAvailable);
+
+            setCommentArray(isCommentAvailable);
+          }}
+        >
+          Edit Profile
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 ">
+            Comments <MessageCircleMore size={20} />
+          </DialogTitle>
+          {/* SHOW COMMENTS OF PEOPLE */}
+          <div>
+            {commentArray.length === 0 ? (
+              <p>This post has no comments yet</p>
+            ) : (
+              commentArray.map((comm, index) => (
+                <div key={index}>
+                  <p>{comm.comment}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </DialogHeader>
+
+        {/* COMMENT TEXT AREA AND BUTTON SECTION */}
+        <div className="space-y-2">
+          <Textarea
+            placeholder="Comment..."
+            onChange={(e) => setComment(e.target.value)}
+            value={comment}
+          />
+
+          <Button
+            onClick={() => {
+              addComment({
+                authCookie: authToken,
+                comment,
+                commentFor: postId,
+                userName: useUserStore.getState().memberProfile[0].name!,
+              });
+              const isCommentAvailable = useUserStore
+                .getState()
+                .comment.filter((comm) => comm.commentFor === postId);
+
+              console.log(isCommentAvailable);
+
+              setCommentArray(isCommentAvailable);
+              // router.refresh()
+
+              setComment("");
+            }}
+            className="w-full"
+          >
+            Comment
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -373,7 +469,6 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
   const [likeArray, setLikeArray] = useState<Like[]>([]);
   // array disliked
   const [dislikeArray, setDislikeArray] = useState<Dislike[]>([]);
-  console.log(dislikeArray);
 
   const getProfiledetails = async () => {
     setLoadign(true);
@@ -498,84 +593,90 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
                 </div>
               </div>
 
-              <div className="mt-4 pl-2 border rounded-full h-10 items-center flex">
-                {/* if already like available */}
-                {typeof post.likeBy === "number" ? (
-                  <Heart
-                    className={
-                      dislikeArray.some((dislike) => dislike.id === post.id)
-                        ? "fill-white text-red-400 hover:scale-125 hover:cursor-pointer transition-all"
-                        : "fill-red-400 text-white hover:scale-125 hover:cursor-pointer transition-all"
-                    }
-                    onClick={async () => {
-                      setDislikeArray((prev) => {
-                        if (prev.some((dislike) => dislike.id === post.id)) {
-                          // if exists only accept those, whose are not matched
-                          return prev.filter(
-                            (dislike) => dislike.id !== post.id
+              <div className="justify-between flex mt-4 pl-2 border rounded-full h-10 items-center">
+                <div className="">
+                  {/* if already like available */}
+                  {typeof post.likeBy === "number" ? (
+                    <Heart
+                      className={
+                        dislikeArray.some((dislike) => dislike.id === post.id)
+                          ? "fill-white text-red-400 hover:scale-125 hover:cursor-pointer transition-all"
+                          : "fill-red-400 text-white hover:scale-125 hover:cursor-pointer transition-all"
+                      }
+                      onClick={async () => {
+                        setDislikeArray((prev) => {
+                          if (prev.some((dislike) => dislike.id === post.id)) {
+                            // if exists only accept those, whose are not matched
+                            return prev.filter(
+                              (dislike) => dislike.id !== post.id
+                            );
+                          } else {
+                            // add the new item/dislike
+                            console.log("else ran");
+
+                            return [...prev, { id: post.id! }];
+                          }
+                        });
+
+                        try {
+                          await axios.post(
+                            `${NEXT_PUBLIC_BACKEND_URL}/member/post/like/manage`,
+                            {
+                              post: post.id,
+                            },
+                            {
+                              headers: {
+                                Authorization: cookie,
+                              },
+                            }
                           );
-                        } else {
-                          // add the new item/dislike
-                          console.log("else ran");
-
-                          return [...prev, { id: post.id! }];
+                        } catch (error) {
+                          console.log(error);
                         }
-                      });
-
-                      try {
-                        await axios.post(
-                          `${NEXT_PUBLIC_BACKEND_URL}/member/post/like/manage`,
-                          {
-                            post: post.id,
-                          },
-                          {
-                            headers: {
-                              Authorization: cookie,
-                            },
-                          }
-                        );
-                      } catch (error) {
-                        console.log(error);
+                      }}
+                    />
+                  ) : (
+                    <Heart
+                      className={
+                        likeArray.some((like) => like.id === post.id)
+                          ? "fill-red-400 text-white hover:scale-125 hover:cursor-pointer transition-all"
+                          : "fill-white text-red-400 hover:scale-125 hover:cursor-pointer transition-all"
                       }
-                    }}
-                  />
-                ) : (
-                  <Heart
-                    className={
-                      likeArray.some((like) => like.id === post.id)
-                        ? "fill-red-400 text-white hover:scale-125 hover:cursor-pointer transition-all"
-                        : "fill-white text-red-400 hover:scale-125 hover:cursor-pointer transition-all"
-                    }
-                    onClick={async () => {
-                      setLikeArray((prev) => {
-                        // check if like exists
-                        if (prev.some((like) => like.id === post.id)) {
-                          // if exists only accept those, whose are not matched
-                          return prev.filter((like) => like.id !== post.id);
-                        } else {
-                          // add the new item/like
-                          return [...prev, { id: post.id! }];
+                      onClick={async () => {
+                        setLikeArray((prev) => {
+                          // check if like exists
+                          if (prev.some((like) => like.id === post.id)) {
+                            // if exists only accept those, whose are not matched
+                            return prev.filter((like) => like.id !== post.id);
+                          } else {
+                            // add the new item/like
+                            return [...prev, { id: post.id! }];
+                          }
+                        });
+
+                        try {
+                          await axios.post(
+                            `${NEXT_PUBLIC_BACKEND_URL}/member/post/like/manage`,
+                            {
+                              post: post.id,
+                            },
+                            {
+                              headers: {
+                                Authorization: cookie,
+                              },
+                            }
+                          );
+                        } catch (error) {
+                          console.log(error);
                         }
-                      });
-
-                      try {
-                        await axios.post(
-                          `${NEXT_PUBLIC_BACKEND_URL}/member/post/like/manage`,
-                          {
-                            post: post.id,
-                          },
-                          {
-                            headers: {
-                              Authorization: cookie,
-                            },
-                          }
-                        );
-                      } catch (error) {
-                        console.log(error);
-                      }
-                    }}
-                  />
-                )}
+                      }}
+                    />
+                  )}
+                </div>
+                <div>
+                  <AddComment authToken={cookie} postId={post.id!} />
+                </div>
+                <div>comment and Like</div>
               </div>
             </div>
           ))}

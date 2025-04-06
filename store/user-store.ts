@@ -14,7 +14,14 @@ interface MemberProfile {
 }
 
 interface LikeArray {
-  "id": number
+  id: number;
+}
+
+interface Comment {
+  commentFor: number;
+  commentByUserId: number;
+  commentByUserName: string;
+  comment: string;
 }
 
 interface Post {
@@ -45,7 +52,8 @@ interface User {
   memberProfile: MemberProfile[];
   postsCreatedByLogedinMember: Post[];
   spacePosts: SpacePosts[];
-  likeArr: LikeArray[]
+  likeArr: LikeArray[];
+  comment: Comment[];
   errorMessage: string | null;
   username: string | null;
   // signup func
@@ -101,6 +109,18 @@ interface User {
   fetchPosts: ({ authCookie }: { authCookie: string }) => Promise<void>;
   // fetch posts in space
   fetchSpacePosts: ({ authCookie }: { authCookie: string }) => Promise<void>;
+  // add comment
+  addComment: ({
+    authCookie,
+    userName,
+    commentFor,
+    comment,
+  }: {
+    authCookie: string;
+    commentFor: number;
+    comment: string;
+    userName: string;
+  }) => Promise<void>;
 }
 
 const useUserStore = create(
@@ -116,6 +136,7 @@ const useUserStore = create(
       memberProfile: [],
       likeArr: [],
       spacePosts: [],
+      comment: [],
       postsCreatedByLogedinMember: [],
       // signinup
       signup: async ({ email, name, password }) => {
@@ -512,6 +533,40 @@ const useUserStore = create(
         } catch (error) {
           console.log(error);
         }
+      },
+      // add comment
+      addComment: async ({ authCookie, commentFor, userName, comment }) => {
+        //set comment to the local storage
+        set((state) => {
+          return {
+            comment: [
+              ...state.comment,
+              {
+                comment: comment,
+                commentFor,
+                commentByUserName: userName,
+                commentByUserId: 0,
+              },
+            ],
+          };
+        });
+
+        // send backend req
+        try {
+          await axios.post(
+            `${NEXT_PUBLIC_BACKEND_URL}/member/post/comment/add-comment`,
+            {
+              comment,
+              userName,
+              commentFor,
+            },
+            {
+              headers: {
+                Authorization: authCookie,
+              },
+            }
+          );
+        } catch (error) {}
       },
     }),
     { name: "userStore" }
