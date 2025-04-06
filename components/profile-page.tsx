@@ -47,10 +47,11 @@ interface Dislike {
 }
 // comment types
 interface Comment {
-  commentFor: number;
-  commentByUserId: number;
-  commentByUserName: string;
+  id: number;
   comment: string;
+  commentFor: number;
+  commentByName: string;
+  commentByUserId: number;
 }
 
 // edit username
@@ -368,6 +369,9 @@ function CreatePost({ authToken }: { authToken: string }) {
   );
 }
 
+
+
+
 // add comment
 function AddComment({
   authToken,
@@ -387,7 +391,9 @@ function AddComment({
           onClick={() => {
             const isCommentAvailable = useUserStore
               .getState()
-              .comment.filter((comm) => comm.commentFor === postId);
+              .fetchComment.filter((comm) => comm.commentFor === postId);
+            console.log(isCommentAvailable);
+            
             setCommentArray(isCommentAvailable);
           }}
           className="text-red-400 hover:scale-125 transition-all hover:cursor-pointer"
@@ -426,11 +432,13 @@ function AddComment({
                 authCookie: authToken,
                 comment,
                 commentFor: postId,
-                userName: useUserStore.getState().memberProfile[0].name!,
+                commentByName: useUserStore.getState().memberProfile[0].name!,
+                commentByUserId: 0,
+                id: 0
               });
               const isCommentAvailable = useUserStore
                 .getState()
-                .comment.filter((comm) => comm.commentFor === postId);
+                .fetchComment.filter((comm) => comm.commentFor === postId);
 
               setCommentArray(isCommentAvailable);
               setComment("");
@@ -487,7 +495,7 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
       .fetchLike.filter((like) => like.likeFor === id);
     const findComment = useUserStore
       .getState()
-      .comment.filter((comm) => comm.commentFor === id);
+      .fetchComment.filter((comm) => comm.commentFor === id);
 
     return (
       <div className="flex items-center gap-2">

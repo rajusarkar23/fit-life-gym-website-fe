@@ -28,7 +28,7 @@ interface FetchComment {
   comment: string;
   commentFor: number;
   commentByName: string;
-  commentByUserIdId: number;
+  commentByUserId: number;
 }
 
 interface Comment {
@@ -128,14 +128,18 @@ interface User {
   // add comment
   addComment: ({
     authCookie,
-    userName,
+    commentByName,
     commentFor,
     comment,
+    commentByUserId,
+    id,
   }: {
     authCookie: string;
     commentFor: number;
     comment: string;
-    userName: string;
+    commentByName: string;
+    commentByUserId: number;
+    id: number;
   }) => Promise<void>;
   fetchLikes: ({ ids }: { ids: number[] }) => Promise<void>;
   // manage likes
@@ -563,18 +567,27 @@ const useUserStore = create(
           console.log(error);
         }
       },
+
       // add comment
-      addComment: async ({ authCookie, commentFor, userName, comment }) => {
+      addComment: async ({
+        authCookie,
+        commentFor,
+        commentByName,
+        commentByUserId,
+        comment,
+        id,
+      }) => {
         //set comment to the local storage
         set((state) => {
           return {
-            comment: [
-              ...state.comment,
+            fetchComment: [
+              ...state.fetchComment,
               {
-                comment: comment,
+                id,
+                comment,
                 commentFor,
-                commentByUserName: userName,
-                commentByUserId: 0,
+                commentByName,
+                commentByUserId,
               },
             ],
           };
@@ -585,7 +598,7 @@ const useUserStore = create(
             `${NEXT_PUBLIC_BACKEND_URL}/member/post/comment/add-comment`,
             {
               comment,
-              userName,
+              userName: commentByName,
               commentFor,
             },
             {
@@ -641,20 +654,22 @@ const useUserStore = create(
         });
       },
       fetchComments: async ({ ids }) => {
-        set({fetchComment: []})
+        set({ fetchComment: [] });
         try {
-          await axios.post(
-            `${NEXT_PUBLIC_BACKEND_URL}/member/post/comment/fetch-comments`,
-            {
-              ids,
-            }
-          ).then((res) => {
-            if (res.data.success) {
-              set({fetchComment: res.data.comments})
-            } else{
-              set({fetchComment: []})
-            }
-          })
+          await axios
+            .post(
+              `${NEXT_PUBLIC_BACKEND_URL}/member/post/comment/fetch-comments`,
+              {
+                ids,
+              }
+            )
+            .then((res) => {
+              if (res.data.success) {
+                set({ fetchComment: res.data.comments });
+              } else {
+                set({ fetchComment: [] });
+              }
+            });
         } catch (error) {}
       },
     }),
