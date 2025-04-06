@@ -2,6 +2,7 @@
 
 import { useUserStore } from "@/store/user-store";
 import {
+  ChartNoAxesColumn,
   CheckCircle,
   CircleCheck,
   CirclePlus,
@@ -376,28 +377,21 @@ function AddComment({
   postId: number;
 }) {
   const [comment, setComment] = useState("");
-
-  const { addComment } = useUserStore();
-
   const [commentArray, setCommentArray] = useState<Comment[]>([]);
+  const { addComment } = useUserStore();
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
+        <MessageCircleMore
           onClick={() => {
             const isCommentAvailable = useUserStore
               .getState()
               .comment.filter((comm) => comm.commentFor === postId);
-
-            console.log(isCommentAvailable);
-
             setCommentArray(isCommentAvailable);
           }}
-        >
-          Edit Profile
-        </Button>
+          className="text-red-400 hover:scale-125 transition-all hover:cursor-pointer"
+        />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -593,7 +587,7 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
                 </div>
               </div>
 
-              <div className="justify-between flex mt-4 pl-2 border rounded-full h-10 items-center">
+              <div className="justify-between flex mt-4 pl-2 border rounded-full h-10 items-center px-5 shadow-sm">
                 <div className="">
                   {/* if already like available */}
                   {typeof post.likeBy === "number" ? (
@@ -676,7 +670,9 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
                 <div>
                   <AddComment authToken={cookie} postId={post.id!} />
                 </div>
-                <div>comment and Like</div>
+                <div>
+                  <ChartNoAxesColumn className="text-red-400 hover:scale-125 transition-all hover:cursor-pointer"/>
+                </div>
               </div>
             </div>
           ))}
