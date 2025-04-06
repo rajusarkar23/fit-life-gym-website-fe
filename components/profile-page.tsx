@@ -432,11 +432,7 @@ function AddComment({
                 .getState()
                 .comment.filter((comm) => comm.commentFor === postId);
 
-              console.log(isCommentAvailable);
-
               setCommentArray(isCommentAvailable);
-              // router.refresh()
-
               setComment("");
             }}
             className="w-full"
@@ -455,9 +451,14 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
     router.push(`/member/${useUserStore.getState().username}`);
   }
 
+  const ids: any[] = useUserStore
+    .getState()
+    .postsCreatedByLogedinMember.map((post) => post.id);
+
   const params = useParams();
   const [loading, setLoadign] = useState(true);
-  const { getProfile, fetchPosts } = useUserStore();
+  const { getProfile, fetchPosts, fetchLikes, manageLike, fetchComments } =
+    useUserStore();
 
   // array of likes
   const [likeArray, setLikeArray] = useState<Like[]>([]);
@@ -476,7 +477,25 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
   useEffect(() => {
     getProfiledetails();
     fetchPosts({ authCookie: cookie });
+    fetchLikes({ ids });
+    fetchComments({ ids });
   }, []);
+
+  function GetLikeLengthAndCommentLength({ id }: { id: number }) {
+    const findForLike = useUserStore
+      .getState()
+      .fetchLike.filter((like) => like.likeFor === id);
+    const findComment = useUserStore
+      .getState()
+      .comment.filter((comm) => comm.commentFor === id);
+
+    return (
+      <div className="flex items-center gap-2">
+        {`${findForLike.length} likes ${findComment.length} comments`}
+        <ChartNoAxesColumn className="text-red-400 hover:scale-125 transition-all hover:cursor-pointer" />
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -606,10 +625,13 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
                             );
                           } else {
                             // add the new item/dislike
-                            console.log("else ran");
-
                             return [...prev, { id: post.id! }];
                           }
+                        });
+
+                        manageLike({
+                          postId: post.id!,
+                          userId: useUserStore.getState().fetchFor!,
                         });
 
                         try {
@@ -648,6 +670,11 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
                           }
                         });
 
+                        manageLike({
+                          postId: post.id!,
+                          userId: useUserStore.getState().fetchFor!,
+                        });
+
                         try {
                           await axios.post(
                             `${NEXT_PUBLIC_BACKEND_URL}/member/post/like/manage`,
@@ -671,7 +698,7 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
                   <AddComment authToken={cookie} postId={post.id!} />
                 </div>
                 <div>
-                  <ChartNoAxesColumn className="text-red-400 hover:scale-125 transition-all hover:cursor-pointer"/>
+                  <GetLikeLengthAndCommentLength id={post.id!} />
                 </div>
               </div>
             </div>

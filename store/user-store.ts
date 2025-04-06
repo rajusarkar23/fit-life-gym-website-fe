@@ -17,6 +17,20 @@ interface LikeArray {
   id: number;
 }
 
+interface FetchLike {
+  id: number;
+  likeFor: number;
+  likeBy: number;
+}
+
+interface FetchComment {
+  id: number;
+  comment: string;
+  commentFor: number;
+  commentByName: string;
+  commentByUserIdId: number;
+}
+
 interface Comment {
   commentFor: number;
   commentByUserId: number;
@@ -54,6 +68,8 @@ interface User {
   spacePosts: SpacePosts[];
   likeArr: LikeArray[];
   comment: Comment[];
+  fetchLike: FetchLike[];
+  fetchComment: FetchComment[];
   errorMessage: string | null;
   username: string | null;
   // signup func
@@ -121,6 +137,17 @@ interface User {
     comment: string;
     userName: string;
   }) => Promise<void>;
+  fetchLikes: ({ ids }: { ids: number[] }) => Promise<void>;
+  // manage likes
+  manageLike: ({
+    postId,
+    userId,
+  }: {
+    postId: number;
+    userId: number;
+  }) => Promise<void>;
+  // fetch comments
+  fetchComments: ({ ids }: { ids: number[] }) => Promise<void>;
 }
 
 const useUserStore = create(
@@ -137,6 +164,8 @@ const useUserStore = create(
       likeArr: [],
       spacePosts: [],
       comment: [],
+      fetchLike: [],
+      fetchComment: [],
       postsCreatedByLogedinMember: [],
       // signinup
       signup: async ({ email, name, password }) => {
@@ -550,7 +579,6 @@ const useUserStore = create(
             ],
           };
         });
-
         // send backend req
         try {
           await axios.post(
@@ -566,6 +594,67 @@ const useUserStore = create(
               },
             }
           );
+        } catch (error) {}
+      },
+      // fetch likes
+      fetchLikes: async ({ ids }) => {
+        set({ fetchLike: [] });
+        try {
+          await axios
+            .post(`${NEXT_PUBLIC_BACKEND_URL}/member/post/like/fetch`, {
+              ids,
+            })
+            .then((res) => {
+              console.log(res);
+
+              set({ fetchLike: res.data.likes });
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        } catch (error) {}
+      },
+      // manage likes
+      manageLike: async ({ postId, userId }) => {
+        set((state) => {
+          const isLiked = state.fetchLike.some(
+            (like) => like.likeFor === postId
+          );
+          console.log("ran managelike");
+
+          if (isLiked) {
+            console.log("ran isliked");
+
+            return {
+              fetchLike: state.fetchLike.filter(
+                (like) => like.likeFor !== postId
+              ),
+            };
+          } else {
+            return {
+              fetchLike: [
+                ...state.fetchLike,
+                { id: 0, likeFor: postId, likeBy: userId },
+              ],
+            };
+          }
+        });
+      },
+      fetchComments: async ({ ids }) => {
+        set({fetchComment: []})
+        try {
+          await axios.post(
+            `${NEXT_PUBLIC_BACKEND_URL}/member/post/comment/fetch-comments`,
+            {
+              ids,
+            }
+          ).then((res) => {
+            if (res.data.success) {
+              set({fetchComment: res.data.comments})
+            } else{
+              set({fetchComment: []})
+            }
+          })
         } catch (error) {}
       },
     }),
