@@ -570,7 +570,6 @@ const useUserStore = create(
           console.log(error);
         }
       },
-
       // add comment
       addComment: async ({
         authCookie,
@@ -658,6 +657,7 @@ const useUserStore = create(
           }
         });
       },
+      // fetch comments
       fetchComments: async ({ ids,authCookie }) => {
         set({ fetchComment: [] });
         try {

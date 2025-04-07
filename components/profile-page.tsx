@@ -406,16 +406,17 @@ function AddComment({
               <p>This post has no comments yet</p>
             ) : (
               commentArray.map((comm, index) => (
-                <div key={index} className="flex items-center space-y-2">
+                <div key={index} className="flex items-center space-y-2 gap-1">
                   <div className="mt-1.5">
                     <Image
                       src={comm.userProfileUrl}
                       alt="profile_image"
                       width={40}
                       height={35}
+                      className="rounded-full"
                     />
                   </div>
-                  <div className="bg-gray-200 h-8 w-96 rounded-full px-6 flex items-center">
+                  <div className="bg-gray-200 dark:bg-slate-800 h-8 w-96 rounded-full px-6 flex items-center">
                     <p>
                       <span className="text-blue-600">
                         {comm.commentByName}
@@ -435,6 +436,7 @@ function AddComment({
             placeholder="Comment..."
             onChange={(e) => setComment(e.target.value)}
             value={comment}
+            className="dark:bg-slate-800"
           />
 
           <Button

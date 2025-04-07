@@ -1,29 +1,17 @@
 "use client";
-
-import { useUserStore } from "@/store/user-store";
 import { useEffect } from "react";
-import { Button } from "./ui/button";
+import { useSpaceStore } from "@/store/space-home-store";
 
 export default function SpacePage({ authCookie }: { authCookie: string }) {
-  const { fetchSpacePosts,  } = useUserStore();
+  const { fetchPosts  } = useSpaceStore();
 
   useEffect(() => {
-    fetchSpacePosts({ authCookie });
+    fetchPosts({ authCookie });
   }, []);
 
   return (
     <div>
-        {
-           useUserStore.getState().spacePosts.map((post) => (
-            <div>
-                <p>{post.text}</p>
-                {
-                    useUserStore.getState().fetchFor === post.likeBy! ? (<Button>Hola</Button>): (<Button>Gola</Button>)
-                }
-                
-            </div>
-           )) 
-        }
+      space
     </div>
   )
 }
