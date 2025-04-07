@@ -570,6 +570,7 @@ const useUserStore = create(
           console.log(error);
         }
       },
+
       // add comment
       addComment: async ({
         authCookie,
@@ -629,7 +630,9 @@ const useUserStore = create(
             .catch((err) => {
               console.log(err);
             });
-        } catch (error) {}
+        } catch (error) {
+          console.log(error);
+        }
       },
       // manage likes
       manageLike: async ({ postId, userId }) => {
@@ -637,11 +640,7 @@ const useUserStore = create(
           const isLiked = state.fetchLike.some(
             (like) => like.likeFor === postId
           );
-          console.log("ran managelike");
-
           if (isLiked) {
-            console.log("ran isliked");
-
             return {
               fetchLike: state.fetchLike.filter(
                 (like) => like.likeFor !== postId
@@ -657,7 +656,6 @@ const useUserStore = create(
           }
         });
       },
-      // fetch comments
       fetchComments: async ({ ids,authCookie }) => {
         set({ fetchComment: [] });
         try {
