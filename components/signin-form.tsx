@@ -42,7 +42,7 @@ export default function SigninForm() {
       useUserStore.getState().isResponseOkay &&
       typeof useUserStore.getState().username === "string"
     ) {
-      router.push(`/member/${useUserStore.getState().username}`);
+      router.push(`/member/dashboard/${useUserStore.getState().username}`);
     }
   };
 

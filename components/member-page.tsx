@@ -19,10 +19,10 @@ useEffect(() => {
     <div className="flex justify-center flex-col items-center">
       <h2>Hey, Member</h2>
       <div className="space-x-5">
-        <Link href={`/space/profile/${userName}`} className="text-blue-600 underline">
+        <Link href={`/member/profile/${userName}`} className="text-blue-600 underline">
           Go to profile
         </Link>
-        <Link href={`/space/${userName}`} className="text-blue-600 underline">
+        <Link href={`/member/space/${userName}`} className="text-blue-600 underline">
           Go to space
         </Link>
       </div>
