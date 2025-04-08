@@ -68,8 +68,7 @@ export default function MembershipPage() {
                     </ul>
                   </CardContent>
                   <CardFooter>
-                    {/* <Button className="w-full">Join Now</Button> */}
-                    <Link href={"/auth/signin"} className="bg-primary w-full h-10 items-center flex justify-center rounded">Join Now</Link>
+                    <Link href={"/auth/signin"} className="bg-primary w-full h-10 items-center flex justify-center rounded text-white">Join Now</Link>
                   </CardFooter>
                 </Card>
                 <Card className="border-primary">
@@ -117,7 +116,7 @@ export default function MembershipPage() {
                     </ul>
                   </CardContent>
                   <CardFooter>
-                    <Button className="w-full">Join Now</Button>
+                  <Link href={"/auth/signin"} className="bg-primary w-full h-10 items-center flex justify-center rounded text-white">Join Now</Link>
                   </CardFooter>
                 </Card>
                 <Card>
@@ -162,7 +161,7 @@ export default function MembershipPage() {
                     </ul>
                   </CardContent>
                   <CardFooter>
-                    <Button className="w-full">Join Now</Button>
+                  <Link href={"/auth/signin"} className="bg-primary w-full h-10 items-center flex justify-center rounded text-white">Join Now</Link>
                   </CardFooter>
                 </Card>
               </div>

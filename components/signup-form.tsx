@@ -5,8 +5,9 @@ import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
 import { useUserStore } from "@/store/user-store";
 import { useRouter } from "next/navigation";
-import { LoaderCircle } from "lucide-react";
+import { Dumbbell, LoaderCircle } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 
 type Data = {
   name: string;
@@ -46,9 +47,20 @@ export default function SignupForm() {
 
   return (
     <div className="flex items-center justify-center min-h-[80vh] flex-col">
+      <div className="border p-16 shadow shadow-red-400/60 rounded">
+        <div className="flex gap-2 justify-center">
+        <div className="relative">
+          <Dumbbell className="h-6 w-6 text-primary group-hover:rotate-12 transition-transform duration-300" />
+          <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        </div>
+        <span className="font-bold text-lg">
+          FitLife <span className="text-primary">Gym</span>
+        </span>
+      </div>
+
       <div className="py-8">
         <h2 className="text-sm font-bold text-center">Signup</h2>
-        <p className="text-sm font-light">Please signup first to continue</p>
+        <p className="text-sm font-light text-center">Please signup first to continue</p>
       </div>
       <div>
         <form className="w-96 space-y-2" onSubmit={handleSubmit(onSubmit)}>
@@ -114,7 +126,13 @@ export default function SignupForm() {
             </Button>
           )}
         </form>
+
+        <div className="flex justify-center mt-4">
+            <Link href={"/auth/signin"} className="text-blue-600">Already have account ? Signin</Link>
+          </div>
       </div>
+      </div>
+      
     </div>
   );
 }
