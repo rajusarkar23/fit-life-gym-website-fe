@@ -73,6 +73,7 @@ interface User {
   fetchComment: FetchComment[];
   errorMessage: string | null;
   username: string | null;
+  name: string | null;
   // signup func
   signup: ({
     name,
@@ -167,6 +168,7 @@ const useUserStore = create(
       fetchFor: null,
       errorMessage: null,
       username: null,
+      name: null,
       memberProfile: [],
       likeArr: [],
       spacePosts: [],
@@ -346,6 +348,7 @@ const useUserStore = create(
                   isResponseOkay: true,
                   isUserLogedIn: true,
                   username: response.data.username,
+                  name: response.data.name
                 });
               }
             })

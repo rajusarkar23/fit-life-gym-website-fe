@@ -1,9 +1,11 @@
+import { MemberHeader } from "@/components/member-header";
+
 export default function MemberLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div>
-      <div>Member Area</div>
+      <MemberHeader />
       {children}
     </div>
   );

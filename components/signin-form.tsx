@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { Dumbbell, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
+import { useSpaceStore } from "@/store/space-home-store";
 
 type Data = {
   email: string;
@@ -22,9 +23,7 @@ export default function SigninForm() {
   } = useForm<Data>();
 
   const router = useRouter();
-
   const [error, setError] = useState("");
-
   const { signin } = useUserStore();
 
   const onSubmit = async (data: Data) => {
