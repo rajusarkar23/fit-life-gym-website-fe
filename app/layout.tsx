@@ -8,12 +8,12 @@ import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata = {
-  title: "FitLife Gym - Transform Your Body, Transform Your Life",
-  description:
-    "FitLife Gym offers state-of-the-art equipment, expert trainers, and a supportive community to help you achieve your fitness goals.",
-    generator: 'v0.dev'
-}
+// export const metadata = {
+//   title: "FitLife Gym - Transform Your Body, Transform Your Life",
+//   description:
+//     "FitLife Gym offers state-of-the-art equipment, expert trainers, and a supportive community to help you achieve your fitness goals.",
+//     generator: 'v0.dev'
+// }
 
 export default function RootLayout({
   children,
@@ -25,11 +25,11 @@ export default function RootLayout({
       <body className={`${inter.className} gym-pattern min-h-screen`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <div className="relative flex min-h-screen flex-col">
-            <SiteHeader />
+            {/* <SiteHeader /> */}
             <main className="flex-1">{children}</main>
-            <SiteFooter />
+            {/* <SiteFooter /> */}
           </div>
-          <Toaster />
+          {/* <Toaster /> */}
         </ThemeProvider>
       </body>
     </html>
