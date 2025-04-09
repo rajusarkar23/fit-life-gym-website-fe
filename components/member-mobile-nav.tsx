@@ -47,7 +47,7 @@ export function MobileNav() {
             Space
           </Link>
           <Link
-            href={`/member/space/${useUserStore.getState().username}`}
+            href={`/member/profile/${useUserStore.getState().username}`}
             className="text-lg font-medium hover:text-primary"
             onClick={() => setOpen(false)}
           >
