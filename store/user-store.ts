@@ -29,7 +29,7 @@ interface FetchComment {
   commentFor: number;
   commentByName: string;
   commentByUserId: number;
-  userProfileUrl: string
+  userProfileUrl: string;
 }
 
 interface Comment {
@@ -74,6 +74,8 @@ interface User {
   errorMessage: string | null;
   username: string | null;
   name: string | null;
+  selectedPlan: string | null;
+  isPlanSelected: boolean;
   // signup func
   signup: ({
     name,
@@ -143,7 +145,7 @@ interface User {
     commentByName: string;
     commentByUserId: number;
     id: number;
-    userProfileUrl: string
+    userProfileUrl: string;
   }) => Promise<void>;
   fetchLikes: ({ ids }: { ids: number[] }) => Promise<void>;
   // manage likes
@@ -155,7 +157,21 @@ interface User {
     userId: number;
   }) => Promise<void>;
   // fetch comments
-  fetchComments: ({ ids, authCookie }: { ids: number[], authCookie: string }) => Promise<void>;
+  fetchComments: ({
+    ids,
+    authCookie,
+  }: {
+    ids: number[];
+    authCookie: string;
+  }) => Promise<void>;
+  // handle plan selection
+  handlePlanSelection: ({
+    authCookie,
+    selectedPlan,
+  }: {
+    authCookie: string;
+    selectedPlan: string;
+  }) => Promise<void>;
 }
 
 const useUserStore = create(
@@ -169,6 +185,8 @@ const useUserStore = create(
       errorMessage: null,
       username: null,
       name: null,
+      isPlanSelected: false,
+      selectedPlan: null,
       memberProfile: [],
       likeArr: [],
       spacePosts: [],
@@ -250,6 +268,8 @@ const useUserStore = create(
           isResponseOkay: false,
           isUserLogedIn: false,
           username: null,
+          isPlanSelected: false,
+          selectedPlan: "none",
         });
 
         try {
@@ -268,6 +288,8 @@ const useUserStore = create(
             )
             .then((response) => {
               if (response.data.success) {
+                console.log(response);
+
                 set({
                   isLoading: false,
                   isError: false,
@@ -275,6 +297,8 @@ const useUserStore = create(
                   isResponseOkay: true,
                   isUserLogedIn: true,
                   username: response.data.username,
+                  selectedPlan: response.data.selectedPlan,
+                  isPlanSelected: response.data.isPlanSelected,
                 });
               }
             })
@@ -285,6 +309,8 @@ const useUserStore = create(
                 errorMessage: error.response.data.message,
                 isResponseOkay: false,
                 username: null,
+                isPlanSelected: false,
+                selectedPlan: "none",
               });
             });
         } catch (error) {
@@ -294,6 +320,8 @@ const useUserStore = create(
             isError: true,
             errorMessage: "Something went wrong",
             username: null,
+            isPlanSelected: false,
+            selectedPlan: "none",
           });
         }
       },
@@ -306,6 +334,8 @@ const useUserStore = create(
           errorMessage: null,
           isUserLogedIn: false,
           username: null,
+          isPlanSelected: false,
+          selectedPlan: "none",
         });
         // zod schema validation
         const userDataSchema = z.object({
@@ -348,7 +378,9 @@ const useUserStore = create(
                   isResponseOkay: true,
                   isUserLogedIn: true,
                   username: response.data.username,
-                  name: response.data.name
+                  name: response.data.name,
+                  selectedPlan: response.data.selectedPlan,
+                  isPlanSelected: response.data.isPlanSelected,
                 });
               }
             })
@@ -359,6 +391,8 @@ const useUserStore = create(
                 isResponseOkay: false,
                 errorMessage: error.response.data.message,
                 username: null,
+                isPlanSelected: false,
+                selectedPlan: "none",
               });
             });
         } catch (error) {
@@ -367,6 +401,8 @@ const useUserStore = create(
             isError: true,
             errorMessage: "Something went wrong, try again",
             username: null,
+            isPlanSelected: false,
+            selectedPlan: "none",
           });
         }
       },
@@ -573,7 +609,6 @@ const useUserStore = create(
           console.log(error);
         }
       },
-
       // add comment
       addComment: async ({
         authCookie,
@@ -582,7 +617,7 @@ const useUserStore = create(
         commentByUserId,
         comment,
         id,
-        userProfileUrl
+        userProfileUrl,
       }) => {
         //set comment to the local storage
         set((state) => {
@@ -659,7 +694,7 @@ const useUserStore = create(
           }
         });
       },
-      fetchComments: async ({ ids,authCookie }) => {
+      fetchComments: async ({ ids, authCookie }) => {
         set({ fetchComment: [] });
         try {
           await axios
@@ -667,10 +702,11 @@ const useUserStore = create(
               `${NEXT_PUBLIC_BACKEND_URL}/member/post/comment/fetch-comments`,
               {
                 ids,
-              }, {
+              },
+              {
                 headers: {
-                  Authorization: authCookie
-                }
+                  Authorization: authCookie,
+                },
               }
             )
             .then((res) => {
@@ -682,6 +718,33 @@ const useUserStore = create(
             });
         } catch (error) {}
       },
+      // handle plan selection
+      handlePlanSelection: async ({authCookie, selectedPlan}) => {
+        set({isLoading: true, isError: false, errorMessage: null, selectedPlan: "none", isPlanSelected: false})
+        // send api req
+        try {
+          await axios.put(`${NEXT_PUBLIC_BACKEND_URL}/member/profile/plan-selection`, {
+            selectedPlan
+          }, {
+            headers: {
+              Authorization: authCookie
+            }
+          }).then((res) => {
+            console.log(res.data);
+            if (res.data.success) {
+              set({isLoading: false, isError: false, isPlanSelected: res.data.isPlanSelected, selectedPlan: res.data.selectedPlan})
+            } else{
+              set({isLoading: false, isError: true, errorMessage: res.data.message})
+            }
+          }).catch((err) => {
+            console.log(err);
+            set({isLoading: false, isError: true, errorMessage: err.response.data.message})
+          })
+        } catch (error) {
+          console.log(error);
+          set({isLoading: false, isError: true, errorMessage: "Something went wrong"})
+        }
+      }
     }),
     { name: "userStore" }
   )

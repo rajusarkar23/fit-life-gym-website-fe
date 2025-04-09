@@ -39,9 +39,11 @@ export default function SigninForm() {
 
     if (
       useUserStore.getState().isResponseOkay &&
-      typeof useUserStore.getState().username === "string"
+      typeof useUserStore.getState().username === "string" && useUserStore.getState().isPlanSelected && useUserStore.getState().isUserLogedIn
     ) {
-      router.push(`/member/dashboard/${useUserStore.getState().username}`);
+      router.push(`/member/dashboard`);
+    } else if (useUserStore.getState().isUserLogedIn || !useUserStore.getState().isPlanSelected){
+      router.push("/auth/signin")
     }
   };
 

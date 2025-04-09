@@ -26,8 +26,8 @@ export function VerifyOtp({cookie}: {cookie: string}) {
         setError(useUserStore.getState().errorMessage!)
     }
 
-    if (useUserStore.getState().isResponseOkay && typeof useUserStore.getState().username === "string" ) {
-        router.push(`/member/${useUserStore.getState().username}`)
+    if (useUserStore.getState().isResponseOkay && typeof useUserStore.getState().username === "string" && useUserStore.getState().isPlanSelected === false && useUserStore.getState().selectedPlan === "none") {
+        router.push("/plan-selection")
     }
 
   }

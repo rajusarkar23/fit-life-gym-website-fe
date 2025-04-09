@@ -74,7 +74,7 @@ function EditUserNameDialog({
     await updateUserName({ authCookie: cookie!, newUserName: newUserName });
 
     if (useUserStore.getState().isResponseOkay) {
-      router.push(`/space/profile/${useUserStore.getState().username}`);
+      router.push(`/member/profile/${useUserStore.getState().username}`);
     }
   };
 
@@ -472,7 +472,7 @@ function AddComment({
 export default function ProfilePage({ cookie }: { cookie: string }) {
   const router = useRouter();
   if (useUserStore.getState().errorMessage === "No member found.") {
-    router.push(`/member/${useUserStore.getState().username}`);
+    router.push(`/member/dashboard/${useUserStore.getState().username}`);
   }
 
   const ids: any[] = useUserStore
