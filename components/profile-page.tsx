@@ -38,6 +38,7 @@ import {
 import { Textarea } from "./ui/textarea";
 import axios from "axios";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/lib/config";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface Like {
   id: number;
@@ -416,7 +417,7 @@ function AddComment({
                       className="rounded-full"
                     />
                   </div>
-                  <div className="bg-gray-200 dark:bg-slate-800 h-8 w-96 rounded-full px-6 flex items-center">
+                  <div className="bg-gray-200 dark:bg-slate-800 h-auto sm:w-96 w-64 rounded-full px-6 flex items-center">
                     <p>
                       <span className="text-blue-600">
                         {comm.commentByName}
@@ -477,6 +478,9 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
   const ids: any[] = useUserStore
     .getState()
     .postsCreatedByLogedinMember.map((post) => post.id);
+
+  // is mobile or not
+  const isMobile = useMobile()
 
   const params = useParams();
   const [loading, setLoadign] = useState(true);
@@ -584,7 +588,7 @@ export default function ProfilePage({ cookie }: { cookie: string }) {
           useUserStore.getState().postsCreatedByLogedinMember.map((post) => (
             <div
               key={post.id!}
-              className="border w-[500px] px-4 rounded py-4 bg-gray- dark:bg-slate-900 shadow-lg"
+              className={isMobile ? "border w-[360px] px-4 rounded py-4 dark:bg-slate-900 shadow-lg" : "border w-[500px] px-4 rounded py-4 dark:bg-slate-900 shadow-lg"}
             >
               {/* show creator profile image,name and timestamp */}
               <div className="flex flex-row items-center gap-1">

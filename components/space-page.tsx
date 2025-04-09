@@ -19,6 +19,7 @@ import {
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { useSpaceStore } from "@/store/space-home-store";
+import { useMobile } from "@/hooks/use-mobile";
 
 // comment types
 interface Comment {
@@ -55,7 +56,7 @@ function AddComment({
           className="text-red-400 hover:scale-125 transition-all hover:cursor-pointer"
         />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-w-[350px] rounded">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 ">
             Comments <MessageCircleMore size={20} />
@@ -76,7 +77,7 @@ function AddComment({
                       className="rounded-full"
                     />
                   </div>
-                  <div className="bg-gray-200 dark:bg-slate-800 h-8 w-96 rounded-full px-6 flex items-center">
+                  <div className="bg-gray-200 dark:bg-slate-800 h-auto sm:w-96 w-60 rounded-full px-4 flex items-center">
                     <p>
                       <span className="text-blue-600">
                         {comm.commentByName}
@@ -130,6 +131,8 @@ function AddComment({
 
 export default function SpacePage({ authCookie }: { authCookie: string }) {
   const { fetchPosts, getProfile, fetchComments, fetchLikes } = useSpaceStore();
+  const isMobile = useMobile()
+
 
   const params = useParams();
   const [loading, setLoadign] = useState(false);
@@ -177,14 +180,14 @@ export default function SpacePage({ authCookie }: { authCookie: string }) {
   }
 
   return (
-    <div>
+    <div className="">
       {/* show posts */}
       <div className="flex flex-col items-center space-y-2">
         {useSpaceStore.getState().posts.length > 0 &&
           useSpaceStore.getState().posts.map((post) => (
             <div
               key={post.id!}
-              className="border w-[500px] px-4 rounded py-4 dark:bg-slate-900 shadow-lg"
+              className={isMobile ? "border w-[360px] px-4 rounded py-4 dark:bg-slate-900 shadow-lg" : "border w-[500px] px-4 rounded py-4 dark:bg-slate-900 shadow-lg"}
             >
               {/* show creator profile image,name and timestamp */}
               <div className="flex flex-row items-center gap-1">
@@ -235,7 +238,6 @@ export default function SpacePage({ authCookie }: { authCookie: string }) {
               <div className="justify-between flex mt-4 pl-2 border rounded-full h-10 items-center px-5 shadow-sm">
                 <div className="">
                   {/* NEW CODE */}
-
                   {
                     <Heart 
                       className={useSpaceStore.getState().likes.some((like) => like.likeFor === post.id)
