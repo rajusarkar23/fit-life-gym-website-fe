@@ -6,7 +6,7 @@ const Verify = async () => {
 
   return (
     <div>
-      <AdminVerifyOtp cookie={cookiesore.get("_fit_life_gym_verify")?.value!} />
+      <AdminVerifyOtp cookie={cookiesore.get("_fit_life_gym_verify_admin")?.value!} />
     </div>
   );
 };

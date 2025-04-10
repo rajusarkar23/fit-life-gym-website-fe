@@ -32,6 +32,10 @@ export default function AdminSignupForm() {
       name: data.name,
       password: data.password,
     });
+
+    if (useAdminStore.getState().isSignupRegistrationSuccess) {
+      router.push("/admin/auth/verify")
+    }
   };
 
   return (
@@ -99,7 +103,10 @@ export default function AdminSignupForm() {
           {errors.password && (
             <p className="text-xs text-red-500">{errors.password.message}</p>
           )}
-          {useUserStore.getState().isLoading ? (
+          <div>
+            {useAdminStore.getState().isError && (<p className="text-sm text-red-600 text-center">{useAdminStore.getState().errorMessage}</p>)}
+          </div>
+          {useAdminStore.getState().isLoading ? (
             <Button
               variant={"outline"}
               disabled

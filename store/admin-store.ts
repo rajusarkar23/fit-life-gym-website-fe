@@ -2,6 +2,7 @@ import axios from "axios";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import z from "zod"
+import { NEXT_PUBLIC_BACKEND_URL } from "@/lib/config";
 
 //FINAL ADMIN STORE DATA TYPES
 interface AdminStore {
@@ -45,7 +46,7 @@ const useAdminStore = create(persist<AdminStore>((set) => ({
         // zod input fields validation
         const adminInputValidation = z.object({
             email: z.string().email({message: "Email is not valid"}),
-            password: z.string().min(7, {message: "Password length should be minimum 6 character."})
+            password: z.string().min(6, {message: "Password length should be minimum 6 character."})
         })
         // parse data
         const safeParsingData = adminInputValidation.safeParse({email, password})
@@ -60,29 +61,30 @@ const useAdminStore = create(persist<AdminStore>((set) => ({
             return 
         }
 
-        console.log(safeParsingData);
-        return
-
         // send api req
-        // try {
-        //     await axios.post(`backend uri`, {
-        //         email: safeParsingData.data.email,
-        //         password: safeParsingData.data.password
-        //     }).then((res) => {
-        //         if (res.data.success) {
-        //             set({
-        //                 isLoading: false, 
-        //                 isError: false, 
-        //                 isAuthenticated: true, 
-        //                 isSigninSuccess: true
-        //             })
-        //         }
-        //     }).catch((err) => {
-        //         set({isLoading: false, isError: true, errorMessage: err.response.data.message})
-        //     })
-        // } catch (error) {
-        //     set({isLoading: false, isError: false, errorMessage: "Unknown error, try again"})
-        // }
+        try {
+            await axios.post(`${NEXT_PUBLIC_BACKEND_URL}/admin/auth/signin`, {
+                email: safeParsingData.data.email,
+                password: safeParsingData.data.password
+            }, {
+                withCredentials: true,
+            }).then((res) => {
+                console.log(res);
+                
+                if (res.data.success) {
+                    set({
+                        isLoading: false, 
+                        isError: false, 
+                        isAuthenticated: true, 
+                        isSigninSuccess: true
+                    })
+                }
+            }).catch((err) => {
+                set({isLoading: false, isError: true, errorMessage: err.response.data.message})
+            })
+        } catch (error) {
+            set({isLoading: false, isError: false, errorMessage: "Unknown error, try again"})
+        }
     },
     // signup
     signup: async ({email, name, password}) => {
@@ -114,11 +116,15 @@ const useAdminStore = create(persist<AdminStore>((set) => ({
 
         // send api req
         try {
-            await axios.post("backend uri", {
+            await axios.post(`${NEXT_PUBLIC_BACKEND_URL}/admin/auth/signup`, {
                 email: safeParsingData.data.email,
                 name: safeParsingData.data.name,
                 password: safeParsingData.data.password
+            }, {
+                withCredentials: true
             }).then((res) => {
+                console.log(res);
+                
                 if (res.data.success) {
                     set({
                         isLoading: false, 
@@ -173,10 +179,17 @@ const useAdminStore = create(persist<AdminStore>((set) => ({
 
         // send api req
         try {
-            await axios.post("backne uti", {
+            await axios.post(`${NEXT_PUBLIC_BACKEND_URL}/admin/auth/verify-otp`, {
                 otp: safeParsingData.data.otp
-            }).then((res) => {
+            }, {
+                headers: {
+                    Authorization: authCookie
+                },
+                withCredentials: true
+            },).then((res) => {
                 if (res.data.success) {
+                    console.log(res);
+                    
                     set({
                         isLoading: false,
                         isError: false,

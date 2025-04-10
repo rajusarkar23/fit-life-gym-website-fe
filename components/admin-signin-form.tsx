@@ -3,7 +3,6 @@ import { Label } from "@radix-ui/react-label";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
-import { useUserStore } from "@/store/user-store";
 import { useRouter } from "next/navigation";
 import { Dumbbell, LoaderCircle } from "lucide-react";
 import Link from "next/link";
@@ -29,13 +28,15 @@ export default function AdminSigninForm() {
 
  
   const onSubmit = async (data: Data) => {
-    setError(false)
+    // setError(false)
     await signin({
       email: data.email,
       password: data.password,
     });
-
-    useAdminStore.getState().isError && setError(true)
+    // useAdminStore.getState().isError && setError(true)
+    if (useAdminStore.getState().isAuthenticated && useAdminStore.getState().isSigninSuccess) {
+      router.push("/admin/dashboard")
+    }
 
   };
 
@@ -91,7 +92,7 @@ export default function AdminSigninForm() {
 
             <div>
               {
-                error && 
+                useAdminStore.getState().isError && 
                 (<p className="text-sm text-center text-red-600">Error: {useAdminStore.getState().errorMessage}</p>)
               }
             </div>

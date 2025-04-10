@@ -6,31 +6,25 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useUserStore } from "@/store/user-store";
 import { Button } from "./ui/button";
 import { LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAdminStore } from "@/store/admin-store";
 
-export function AdminVerifyOtp({cookie}: {cookie: string}) {
+export function AdminVerifyOtp({ cookie }: { cookie: string }) {
   const [otpValue, setOtpValue] = useState("");
-  const [error, setError] = useState("")
-
-    const {verify} = useUserStore()
-
-    const router = useRouter()
+  const { verifyOtp } = useAdminStore();
+  const router = useRouter();
 
   const handleClick = async () => {
-    setError("")
-    await verify({otp: otpValue, authCookie: cookie})
-    if (useUserStore.getState().isError) {
-        setError(useUserStore.getState().errorMessage!)
-    }
+    await verifyOtp({ otp: otpValue, authCookie: cookie });
 
-    if (useUserStore.getState().isResponseOkay && typeof useUserStore.getState().username === "string" && useUserStore.getState().isPlanSelected === false && useUserStore.getState().selectedPlan === "none") {
-        router.push("/plan-selection")
+    if (
+      useAdminStore.getState().isOtpVerificationSuccess && useAdminStore.getState().isAuthenticated && useAdminStore.getState().isSigninSuccess
+    ) {
+      router.push("/admin/dashboard");
     }
-
-  }
+  };
 
   return (
     <div className="space-y-2 justify-center flex flex-col items-center mx-auto min-h-[80vh]">
@@ -57,17 +51,24 @@ export function AdminVerifyOtp({cookie}: {cookie: string}) {
         ) : (
           <>You entered: {otpValue}</>
         )}
-
-        <p className="text-sm text-red-500 font-semibold">{error}</p>
+      </div>
+      <div>
+        {useAdminStore.getState().isError && (
+          <p className="text-sm text-red-600">
+            {useAdminStore.getState().errorMessage}
+          </p>
+        )}
       </div>
 
       <div>
-        {useUserStore.getState().isLoading ? (
+        {useAdminStore.getState().isLoading ? (
           <Button disabled variant={"outline"}>
             <LoaderCircle className="animate-spin" />
           </Button>
         ) : (
-          <Button type="submit" onClick={handleClick}>Submit</Button>
+          <Button type="submit" onClick={handleClick}>
+            Submit
+          </Button>
         )}
       </div>
     </div>
