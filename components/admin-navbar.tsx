@@ -3,7 +3,7 @@ import { Dumbbell } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { MobileNav } from "./member-mobile-nav";
 
-export function MemberHeader() {
+export function AdminHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -18,13 +18,17 @@ export function MemberHeader() {
           <span className="font-bold text-lg flex gap-1">
             FitLife <span className="text-primary">Gym</span>
           </span>
+
+          <div className="flex items-center justify-center">
+            <h3 className="font-bold text-xl italic">Admin Dashboard</h3>
+          </div>
         </div>
         {/* LEFT SIDE OF THE HEADER */}
         <div className="flex items-center">
           <ThemeToggle />
           {/* MOBILE MENU */}
           <div className="">
-           <MobileNav />
+           {/* <MobileNav /> */}
           </div>
         </div>
       </div>

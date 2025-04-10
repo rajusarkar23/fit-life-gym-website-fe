@@ -3,7 +3,6 @@ import { Label } from "@radix-ui/react-label";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
-import { useUserStore } from "@/store/user-store";
 import { useRouter } from "next/navigation";
 import { Dumbbell, LoaderCircle } from "lucide-react";
 import Link from "next/link";
@@ -123,7 +122,7 @@ export default function AdminSignupForm() {
         </form>
 
         <div className="flex justify-center mt-4">
-            <Link href={"/auth/signin"} className="text-blue-600">Already have account ? Signin</Link>
+            <Link href={"/admin/auth/signin"} className="text-blue-600">Already have account ? Signin</Link>
           </div>
       </div>
       </div>

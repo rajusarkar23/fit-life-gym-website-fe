@@ -14,6 +14,9 @@ interface AdminStore {
     isSignupRegistrationSuccess: boolean,
     isOtpVerificationSuccess: boolean,
     isSigninSuccess: boolean,
+    // admin details
+    adminName: string | null,
+    adminUserName: string | null,
     // functions
     // signin
     signin: ({email, password}: {email: string, password: string}) => Promise<void>,
@@ -31,6 +34,8 @@ const useAdminStore = create(persist<AdminStore>((set) => ({
     isSignupRegistrationSuccess: false,
     isOtpVerificationSuccess: false,
     isSigninSuccess: false,
+    adminName: null,
+    adminUserName: null,
 
     // functions
     // signin
@@ -69,14 +74,14 @@ const useAdminStore = create(persist<AdminStore>((set) => ({
             }, {
                 withCredentials: true,
             }).then((res) => {
-                console.log(res);
-                
                 if (res.data.success) {
                     set({
                         isLoading: false, 
                         isError: false, 
                         isAuthenticated: true, 
-                        isSigninSuccess: true
+                        isSigninSuccess: true,
+                        adminName: res.data.name,
+                        adminUserName: res.data.username
                     })
                 }
             }).catch((err) => {
@@ -123,8 +128,6 @@ const useAdminStore = create(persist<AdminStore>((set) => ({
             }, {
                 withCredentials: true
             }).then((res) => {
-                console.log(res);
-                
                 if (res.data.success) {
                     set({
                         isLoading: false, 
@@ -188,14 +191,14 @@ const useAdminStore = create(persist<AdminStore>((set) => ({
                 withCredentials: true
             },).then((res) => {
                 if (res.data.success) {
-                    console.log(res);
-                    
                     set({
                         isLoading: false,
                         isError: false,
                         isOtpVerificationSuccess: true,
                         isAuthenticated: true,
-                        isSigninSuccess: true
+                        isSigninSuccess: true,
+                        adminName: res.data.name,
+                        adminUserName: res.data.username
                     })
                 } else{
                     set({

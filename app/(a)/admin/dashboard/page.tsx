@@ -1,9 +1,21 @@
-import React from 'react'
+"use client"
 
-const page = () => {
+import { useAdminStore } from "@/store/admin-store"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+
+const DashboardPage = () => {
+  const router = useRouter()
+
+  useEffect(() => {
+    if (useAdminStore.getState().isAuthenticated && useAdminStore.getState().isSigninSuccess && typeof useAdminStore.getState().adminName === "string" && typeof useAdminStore.getState().adminUserName === "string") {
+      router.push(`/admin/dashboard/${useAdminStore.getState().adminUserName}`)
+    }
+  }, [])
+
   return (
-    <div>page</div>
+    <div>DashboardPage</div>
   )
 }
 
-export default page
+export default DashboardPage
