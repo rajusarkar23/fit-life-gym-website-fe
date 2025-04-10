@@ -6,50 +6,37 @@ import { useForm } from "react-hook-form";
 import { useUserStore } from "@/store/user-store";
 import { useRouter } from "next/navigation";
 import { Dumbbell, LoaderCircle } from "lucide-react";
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useAdminStore } from "@/store/admin-store";
+import { useState } from "react";
 
 type Data = {
   email: string;
   password: string;
 };
 
-export default function SigninForm() {
+export default function AdminSigninForm() {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<Data>();
 
+  const [error, setError] = useState(false)
+
   const router = useRouter();
-  const [error, setError] = useState("");
-  const { signin } = useUserStore();
+  const { signin } = useAdminStore();
 
-  useEffect(() => {
-    if (useUserStore.getState().isUserLogedIn && useUserStore.getState().isPlanSelected) {
-      router.push("/member/dashboard")
-    }
-  })
-
+ 
   const onSubmit = async (data: Data) => {
-    setError("");
+    setError(false)
     await signin({
       email: data.email,
       password: data.password,
     });
 
-    if (useUserStore.getState().isError) {
-      setError(useUserStore.getState().errorMessage!);
-    }
+    useAdminStore.getState().isError && setError(true)
 
-    if (
-      useUserStore.getState().isResponseOkay &&
-      typeof useUserStore.getState().username === "string" && useUserStore.getState().isPlanSelected && useUserStore.getState().isUserLogedIn
-    ) {
-      router.push(`/member/dashboard`);
-    } else if (useUserStore.getState().isUserLogedIn || !useUserStore.getState().isPlanSelected){
-      router.push("/auth/signin")
-    }
   };
 
   return (
@@ -94,15 +81,21 @@ export default function SigninForm() {
                 required: { value: true, message: "Password is required" },
                 minLength: {
                   value: 6,
-                  message: "Email should be atleast 6 characters",
+                  message: "Password should be atleast 6 characters",
                 },
               })}
             />
             {errors.password && (
               <p className="text-xs text-red-500">{errors.password.message}</p>
             )}
-            <p className="text-center text-sm text-red-500">{error}</p>
-            {useUserStore.getState().isLoading ? (
+
+            <div>
+              {
+                error && 
+                (<p className="text-sm text-center text-red-600">Error: {useAdminStore.getState().errorMessage}</p>)
+              }
+            </div>
+            {useAdminStore.getState().isLoading ? (
               <Button
                 variant={"outline"}
                 disabled
@@ -117,9 +110,8 @@ export default function SigninForm() {
               </Button>
             )}
           </form>
-
           <div className="flex justify-center mt-4">
-            <Link href={"/auth/signup"} className="text-blue-600">New ? Create account</Link>
+            <Link href={"/admin/auth/signup"} className="text-blue-600">New ? Create account</Link>
           </div>
         </div>
       </div>
