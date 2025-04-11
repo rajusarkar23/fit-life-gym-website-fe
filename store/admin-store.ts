@@ -4,6 +4,15 @@ import { persist } from "zustand/middleware";
 import z from "zod"
 import { NEXT_PUBLIC_BACKEND_URL } from "@/lib/config";
 
+// Members data type
+interface Member {
+    name: string | null,
+    email: string | null,
+    isActive: boolean,
+    subscriptionStarted: string | null,
+    subscriptionEnds: string | null
+}
+
 //FINAL ADMIN STORE DATA TYPES
 interface AdminStore {
     isLoading: boolean,
@@ -14,6 +23,8 @@ interface AdminStore {
     isSignupRegistrationSuccess: boolean,
     isOtpVerificationSuccess: boolean,
     isSigninSuccess: boolean,
+    // member array
+    members: Member[]
     // admin details
     adminName: string | null,
     adminUserName: string | null,
@@ -24,6 +35,8 @@ interface AdminStore {
     signup: ({email, password, name}: {email: string, name: string, password: string}) => Promise<void>,
     // verify otp
     verifyOtp: ({authCookie, otp}: {authCookie: string, otp: string}) => Promise<void>
+    // fetch members
+    fetchMembers: ({authCookie}: {authCookie: string}) => Promise<void>
 }
 
 const useAdminStore = create(persist<AdminStore>((set) => ({
@@ -34,6 +47,7 @@ const useAdminStore = create(persist<AdminStore>((set) => ({
     isSignupRegistrationSuccess: false,
     isOtpVerificationSuccess: false,
     isSigninSuccess: false,
+    members: [],
     adminName: null,
     adminUserName: null,
 
@@ -230,6 +244,29 @@ const useAdminStore = create(persist<AdminStore>((set) => ({
                 isSigninSuccess: false,
                 isOtpVerificationSuccess: false
             })
+        }
+    },
+    // fetch members
+    fetchMembers: async ({authCookie}) => {
+        set({isLoading: true, isError: false, errorMessage: null, members: []})
+
+        try {
+            await axios.get(`${NEXT_PUBLIC_BACKEND_URL}/admin/get-members`, {
+                headers: {
+                    Authorization: authCookie
+                }
+            }).then((res) => {
+                if (res.data.success) {
+                    set({isLoading: false, isError: false, errorMessage: null, members: res.data.members})
+                } else{
+                    set({isLoading: false, isError: true, errorMessage: res.data.message})
+                }
+            }).catch((err) => {
+                set({isLoading: false, isError: true, errorMessage: err.response.data.message})
+            })
+        } catch (error) {
+            console.log(error);
+            set({isLoading: false, isError: true, errorMessage: "Unknown error, try again."})
         }
     }
 }),{name: "admin-store"}))
