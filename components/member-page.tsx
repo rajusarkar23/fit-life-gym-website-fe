@@ -106,7 +106,7 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
                 }}
               >
                 {
-              isProfileUpdating ? (<Loader className="animate-spin"/>) : (<p>Update</p>)
+              isProfileUpdating ? (<Loader className="animate-spin"/>) : (<p>Change photo</p>)
               }
               </Button>
             </div>
@@ -127,8 +127,6 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
                     )
                     .then(async (response) => {
                       if (response.data.success) {
-                        setIsProfileUpdating(false);
-                        console.log(response.data.fileUrl);
                         try {
                           const sendReq = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/member/profile/update-profile-photo?data=${response.data.fileUrl}`, {
                             method: "PUT",
@@ -136,17 +134,17 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
                               Authorization: authCookie
                             }
                           })
-
+                          
                           const res =await sendReq.json()
-
+                          
                           if (res.success) {
                             fetchMemberProfile()
+                            setIsProfileUpdating(false);
                           }
                         } catch (error) {
                           console.log(error);
                           setProfileUpadateError("Something is broken")
                         }
-                        fetchMemberProfile()
                       }
                     })
                     .catch((error) => {
@@ -171,7 +169,7 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
       <div className="py-4">
         {useUserStore.getState().memberProfile.length !== 0 && (
           <div>
-            <div>
+            <div className="pt-8">
               <p className="text-2xl text-center">
                 Hello,{" "}
                 <span className="font-bold text-zinc-700">
@@ -180,7 +178,7 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
               </p>
             </div>
 
-            <div className="mt-16 border rounded shadow p-4">
+            <div className="mt-8 border rounded shadow p-4">
               {/* Show plan details */}
               <div className="flex space-x-16">
                 <div className="text-xl">
