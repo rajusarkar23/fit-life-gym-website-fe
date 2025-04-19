@@ -25,6 +25,7 @@ import { Calendar } from "./ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { NEXT_PUBLIC_BACKEND_URL } from "@/lib/config";
+import axios from "axios";
 
 const MemberPage = ({ authCookie }: { authCookie: string }) => {
   const { getProfile } = useUserStore();
@@ -53,6 +54,9 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
   const [isDobUpdatingSuccess, setIsDobUpdatingSuccess] = useState(false)
   const [isDobUpdatingError, setIsDobUpdatingError] = useState(false)
   const [dobUpdatingError, setDobUpdatingError] = useState("")
+  const [isProfileUpdating, setIsProfileUpdating] = useState(false)
+  const [isProfileUpdateError, setIsProfileUpdateError] = useState(false)
+  const [profileUpdateErrorMessage, setProfileUpadateError] = useState("")
 
 
   // refs
@@ -101,12 +105,64 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
                   profilePhotoRef.current?.click()!;
                 }}
               >
-                Change
+                {
+              isProfileUpdating ? (<Loader className="animate-spin"/>) : (<p>Update</p>)
+              }
               </Button>
             </div>
 
             <div className="hidden">
-              <Input type="file" ref={profilePhotoRef} />
+              <Input type="file" ref={profilePhotoRef} 
+              onChange={async(e) => {
+                const file = e.target.files?.[0];
+                const formData = new FormData();
+                formData.append("file", file!);
+                try {
+                  setIsProfileUpdating(true)
+                  setIsProfileUpdateError(false)
+                  await axios
+                    .post(
+                      `${NEXT_PUBLIC_BACKEND_URL}/member/post/upload-post-image`,
+                      formData
+                    )
+                    .then(async (response) => {
+                      if (response.data.success) {
+                        setIsProfileUpdating(false);
+                        console.log(response.data.fileUrl);
+                        try {
+                          const sendReq = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/member/profile/update-profile-photo?data=${response.data.fileUrl}`, {
+                            method: "PUT",
+                            headers: {
+                              Authorization: authCookie
+                            }
+                          })
+
+                          const res =await sendReq.json()
+
+                          if (res.success) {
+                            fetchMemberProfile()
+                          }
+                        } catch (error) {
+                          console.log(error);
+                          setProfileUpadateError("Something is broken")
+                        }
+                        fetchMemberProfile()
+                      }
+                    })
+                    .catch((error) => {
+                      setIsProfileUpdating(false);
+                      setIsProfileUpdateError(true);
+                      setProfileUpadateError(error.response.data)
+                    });
+                } catch (error) {
+                  console.log(error);
+                  setIsProfileUpdating(false);
+                  setIsProfileUpdateError(true);
+                  setProfileUpadateError("Something is broken")
+                }
+                
+              }}
+              />
             </div>
           </div>
         )}
