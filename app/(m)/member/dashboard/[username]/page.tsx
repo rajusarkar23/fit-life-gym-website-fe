@@ -1,9 +1,13 @@
 import MemberPage from "@/components/member-page";
+import { cookies } from "next/headers";
 
-const Dashboard = () => {
+const Dashboard = async () => {
+
+  const authCookie = (await cookies()).get("_fit_life_gym_auth")?.value
+
   return (
     <div>
-      <MemberPage />
+      <MemberPage authCookie={authCookie!}/>
     </div>
   );
 };

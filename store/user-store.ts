@@ -11,6 +11,8 @@ interface MemberProfile {
   gender: string | null;
   profession: string | null;
   dob: string | null;
+  planPurchasedOn: string | null,
+  planEndsOn: string | null
 }
 
 interface LikeArray {

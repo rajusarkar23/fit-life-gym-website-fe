@@ -2,9 +2,10 @@
 import { Dumbbell } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { MobileNav } from "./member-mobile-nav";
+import Link from "next/link";
+import { useUserStore } from "@/store/user-store";
 
 export function MemberHeader() {
-
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -21,10 +22,24 @@ export function MemberHeader() {
         </div>
         {/* LEFT SIDE OF THE HEADER */}
         <div className="flex items-center">
+          <div className="space-x-2 mr-2">
+            <Link
+              href={`/member/space/${useUserStore.getState().username!}`}
+              className="bg-zinc-200 text-black rounded-full px-3 py-1 font-semibold"
+            >
+              Space
+            </Link>
+            <Link
+              href={`/member/profile/${useUserStore.getState().username}`}
+              className=" bg-zinc-200 text-black rounded-full px-3 py-1 font-semibold"
+            >
+              Profile
+            </Link>
+          </div>
           <ThemeToggle />
           {/* MOBILE MENU */}
           <div className="">
-           <MobileNav />
+            <MobileNav />
           </div>
         </div>
       </div>
