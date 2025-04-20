@@ -1,9 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  DropdownMenuItem,
-} from "@radix-ui/react-dropdown-menu";
+import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EllipsisVertical } from "lucide-react";
+import { EllipsisVertical, Loader } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -34,13 +32,41 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { NEXT_PUBLIC_BACKEND_URL } from "@/lib/config";
+import { useAdminStore } from "@/store/admin-store";
 
-export function AdminActionDropDown() {
+export function AdminActionDropDown({
+  memberId,
+  planStatus,
+  authCookie
+}: {
+  memberId: number;
+  planStatus: string;
+  authCookie: string
+}) {
   const [isDropdownOpen, setIsDropDownOpen] = React.useState(false);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] =
     React.useState(false);
+  const [isMemberStatusUpdating, setIsMemberStatusUpdating] = React.useState(false)
+  const [isMemberStatusUpdateError, setIsMemberUpdateError] =
+    React.useState(false);
+  const [memberStatusUpdateErrorMessage, setMemberStatusUpdateErrorMessage] =
+    React.useState("");
+  const [changedMemberStatus, setChangedMemberStatus] = React.useState("");
+
+
+  const { fetchMembers } = useAdminStore();
+
 
   return (
     <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropDownOpen}>
@@ -89,7 +115,7 @@ export function AdminActionDropDown() {
               </Label>
               <Input
                 id="name"
-                defaultValue="Pedro Duarte"
+                defaultValue={planStatus}
                 disabled={true}
                 className="col-span-3"
               />
@@ -98,22 +124,71 @@ export function AdminActionDropDown() {
               <Label htmlFor="username" className="text-right">
                 Change status
               </Label>
-              <Select>
+              <Select
+                onValueChange={(e) => {
+                  setIsMemberUpdateError(false);
+                  if (e === planStatus) {
+                    setIsMemberUpdateError(true);
+                    setMemberStatusUpdateErrorMessage(
+                      `The member status is already ${e}.`
+                    );
+                    return;
+                  }
+                  setChangedMemberStatus(e);
+                }}
+              >
                 <SelectTrigger className="w-[280px]">
                   <SelectValue placeholder="Active or Deactive this member" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Status</SelectLabel>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="notActive">Deactivate</SelectItem>
+                    <SelectItem value="Active">Activate</SelectItem>
+                    <SelectItem value="Inactive">Deactivate</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex justify-center items-center">
+              {isMemberStatusUpdateError && (
+                <p className="text-red-600 font-semibold text-sm">
+                  {memberStatusUpdateErrorMessage}
+                </p>
+              )}
+            </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Save changes</Button>
+            <Button
+              type="submit"
+              disabled={isMemberStatusUpdateError || isMemberStatusUpdating}
+              onClick={async () => {
+                try {
+                  setIsMemberStatusUpdating(true)
+                  const sendReq = await fetch(
+                    `${NEXT_PUBLIC_BACKEND_URL}/admin/update-member-status?status=${changedMemberStatus}&memberId=${memberId}`
+                  );
+                  const res = await sendReq.json();
+                  if (res.success) {
+                    fetchMembers({ authCookie });
+                    setIsMemberStatusUpdating(false)
+                    setIsDialogOpen(false);
+                  } else {
+                    setIsMemberUpdateError(true);
+                    setMemberStatusUpdateErrorMessage(res.message);
+                    setIsMemberStatusUpdating(false)
+                  }
+                } catch (error) {
+                  console.log(error);
+                  setIsMemberUpdateError(true);
+                  setMemberStatusUpdateErrorMessage("Something got broken.");
+                  setIsMemberStatusUpdating(false)
+                }
+              }}
+            >
+              {
+                isMemberStatusUpdating ? (<Loader className="animate-spin"/>) : (<p>Save changes</p>)
+            }
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

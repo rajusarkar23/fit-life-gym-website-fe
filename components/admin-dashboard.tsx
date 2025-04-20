@@ -52,7 +52,7 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
                 {member.isActive ? <p>Active</p> : <p>Inactive</p>}
               </TableCell>
               <TableCell>
-                <AdminActionDropDown />
+                <AdminActionDropDown memberId={member.memberId!} planStatus={member.isActive ? ("Active") : ("Inactive")} authCookie={authCookie}/>
               </TableCell>
             </TableRow>
           ))
