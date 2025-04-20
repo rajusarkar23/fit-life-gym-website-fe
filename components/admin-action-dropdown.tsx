@@ -63,11 +63,10 @@ export function AdminActionDropDown({
   const [memberStatusUpdateErrorMessage, setMemberStatusUpdateErrorMessage] =
     React.useState("");
   const [changedMemberStatus, setChangedMemberStatus] = React.useState("");
+  const [deletingMember, setDeletingMember] = React.useState(false)
 
 
   const { fetchMembers } = useAdminStore();
-
-
   return (
     <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropDownOpen}>
       <DropdownMenuTrigger asChild>
@@ -166,7 +165,9 @@ export function AdminActionDropDown({
                   setIsMemberStatusUpdating(true)
                   const sendReq = await fetch(
                     `${NEXT_PUBLIC_BACKEND_URL}/admin/update-member-status?status=${changedMemberStatus}&memberId=${memberId}`
-                  );
+                  ,{
+                    method: "PUT"
+                  });
                   const res = await sendReq.json();
                   if (res.success) {
                     fetchMembers({ authCookie });
@@ -207,7 +208,28 @@ export function AdminActionDropDown({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction>Confirm</AlertDialogAction>
+            <AlertDialogAction
+            onClick={async () => {
+              try {
+                const sendReq = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/admin/delete-member?data=${memberId}`, {
+                  method: "DELETE"
+                })
+                const res = await sendReq.json()
+
+                if (res.success) {
+                  fetchMembers({authCookie})
+                  setIsDeleteAlertDialogOpen(false)
+                  setIsDropDownOpen(false)
+                } else{
+                  console.log(res);
+                  
+                }
+              } catch (error) {
+                console.log(error);
+                
+              }
+            }}
+            >Confirm</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
