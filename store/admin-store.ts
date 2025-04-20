@@ -6,6 +6,7 @@ import { NEXT_PUBLIC_BACKEND_URL } from "@/lib/config";
 
 // Members data type
 interface Member {
+    memberId: number | null,
     name: string | null,
     email: string | null,
     selectedPlan: string | null,
@@ -249,7 +250,7 @@ const useAdminStore = create(persist<AdminStore>((set) => ({
     },
     // fetch members
     fetchMembers: async ({authCookie}) => {
-        set({isLoading: true, isError: false, errorMessage: null, members: []})
+        set({isLoading: true, isError: false, errorMessage: null})
 
         try {
             await axios.get(`${NEXT_PUBLIC_BACKEND_URL}/admin/get-members`, {
@@ -260,14 +261,14 @@ const useAdminStore = create(persist<AdminStore>((set) => ({
                 if (res.data.success) {
                     set({isLoading: false, isError: false, errorMessage: null, members: res.data.members})
                 } else{
-                    set({isLoading: false, isError: true, errorMessage: res.data.message})
+                    set({isLoading: false, isError: true, errorMessage: res.data.message, members:[]})
                 }
             }).catch((err) => {
-                set({isLoading: false, isError: true, errorMessage: err.response.data.message})
+                set({isLoading: false, isError: true, errorMessage: err.response.data.message, members:[]})
             })
         } catch (error) {
             console.log(error);
-            set({isLoading: false, isError: true, errorMessage: "Unknown error, try again."})
+            set({isLoading: false, isError: true, errorMessage: "Unknown error, try again.", members: []})
         }
     }
 }),{name: "admin-store"}))

@@ -11,6 +11,7 @@ import { useAdminStore } from "@/store/admin-store";
 import { useEffect } from "react";
 import { AdminActionDropDown } from "./admin-action-dropdown";
 import { format } from "date-fns";
+import { Loader } from "lucide-react";
 
 export function AdminDashboard({ authCookie }: { authCookie: string }) {
   const { fetchMembers } = useAdminStore();
@@ -18,6 +19,11 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
   useEffect(() => {
     fetchMembers({ authCookie });
   }, []);
+
+  if (useAdminStore.getState().members.length === 0) {
+    return <div className="flex items-center justify-center min-h-[90vh]"><Loader className="animate-spin ml-1"/></div>
+  }
+
   return (
     <Table className="dark:bg-gray-900/80 max-w-7xl mx-auto">
       <TableHeader>
@@ -33,11 +39,7 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {useAdminStore.getState().members.length === 0 ? (
-          <TableRow>
-            <TableCell>Loading...</TableCell>
-          </TableRow>
-        ) : (
+        {useAdminStore.getState().members.length !== 0 && (
           useAdminStore.getState().members.map((member, index) => (
             <TableRow key={index}>
               <TableCell>{index + 1}</TableCell>
