@@ -8,6 +8,7 @@ import { NEXT_PUBLIC_BACKEND_URL } from "@/lib/config";
 interface Member {
     name: string | null,
     email: string | null,
+    selectedPlan: string | null,
     isActive: boolean,
     subscriptionStarted: string | null,
     subscriptionEnds: string | null
