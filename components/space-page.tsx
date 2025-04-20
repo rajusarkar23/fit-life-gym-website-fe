@@ -237,6 +237,7 @@ export default function SpacePage({ authCookie }: { authCookie: string }) {
                   <Textarea
                     placeholder="Type here"
                     onChange={(e) => setTextContent(e.target.value)}
+                    className="w-64"
                   />
                 </div>
                 <div>
@@ -248,6 +249,7 @@ export default function SpacePage({ authCookie }: { authCookie: string }) {
                     type="file"
                     id="file"
                     name="file"
+                    className="w-64"
                     onChange={async (e) => {
                       setFileUploading(true);
                       setIsFileUploadSuccess(false);
@@ -365,7 +367,7 @@ export default function SpacePage({ authCookie }: { authCookie: string }) {
     <div>
       {/* show posts */}
       <div className="flex flex-col items-center space-y-2">
-        <div className="flex justify-between space-x-20 bg-red-400 rounded-full px-2 py-1 mt-2">
+        <div className="flex justify-between sm:space-x-20 space-x-8 bg-red-400 rounded-full px-2 py-1 mt-2">
           <div
             className="flex items-center bg-white/60 rounded-full p-1 font-bold hover:cursor-pointer px-4"
             onClick={() => {

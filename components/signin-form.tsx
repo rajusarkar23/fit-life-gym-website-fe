@@ -14,7 +14,7 @@ type Data = {
   password: string;
 };
 
-export default function SigninForm() {
+export default function SigninForm({authCookie}: {authCookie: string}) {
   const {
     register,
     handleSubmit,
@@ -26,7 +26,7 @@ export default function SigninForm() {
   const { signin } = useUserStore();
 
   useEffect(() => {
-    if (useUserStore.getState().isUserLogedIn && useUserStore.getState().isPlanSelected) {
+    if (useUserStore.getState().isUserLogedIn && useUserStore.getState().isPlanSelected && typeof authCookie === "string") {
       router.push("/member/dashboard")
     }
   })

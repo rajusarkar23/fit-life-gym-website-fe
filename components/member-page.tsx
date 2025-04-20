@@ -50,14 +50,13 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
   const [isGenderUpdateSuccess, setIsGenderUpdateSuccess] = useState(false);
   const [isGenderUpdateError, setIsGenderUpdateError] = useState(false);
   const [genderUpdateErrorMessage, setGenderUpdateErrorMessage] = useState("");
-  const [isDobUpdating, setIsDobUpdating] = useState(false)
-  const [isDobUpdatingSuccess, setIsDobUpdatingSuccess] = useState(false)
-  const [isDobUpdatingError, setIsDobUpdatingError] = useState(false)
-  const [dobUpdatingError, setDobUpdatingError] = useState("")
-  const [isProfileUpdating, setIsProfileUpdating] = useState(false)
-  const [isProfileUpdateError, setIsProfileUpdateError] = useState(false)
-  const [profileUpdateErrorMessage, setProfileUpadateError] = useState("")
-
+  const [isDobUpdating, setIsDobUpdating] = useState(false);
+  const [isDobUpdatingSuccess, setIsDobUpdatingSuccess] = useState(false);
+  const [isDobUpdatingError, setIsDobUpdatingError] = useState(false);
+  const [dobUpdatingError, setDobUpdatingError] = useState("");
+  const [isProfileUpdating, setIsProfileUpdating] = useState(false);
+  const [isProfileUpdateError, setIsProfileUpdateError] = useState(false);
+  const [profileUpdateErrorMessage, setProfileUpadateError] = useState("");
 
   // refs
   const professionRef = useRef<HTMLInputElement>(null);
@@ -68,7 +67,7 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
       authCookie,
       userName: `${useUserStore.getState().username}`,
     });
-    setDate(new Date(useUserStore.getState().memberProfile[0].dob!))
+    setDate(new Date(useUserStore.getState().memberProfile[0].dob!));
   };
 
   useEffect(() => {
@@ -105,61 +104,67 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
                   profilePhotoRef.current?.click()!;
                 }}
               >
-                {
-              isProfileUpdating ? (<Loader className="animate-spin"/>) : (<p>Change photo</p>)
-              }
+                {isProfileUpdating ? (
+                  <Loader className="animate-spin" />
+                ) : (
+                  <p>Change photo</p>
+                )}
               </Button>
             </div>
 
             <div className="hidden">
-              <Input type="file" ref={profilePhotoRef} 
-              onChange={async(e) => {
-                const file = e.target.files?.[0];
-                const formData = new FormData();
-                formData.append("file", file!);
-                try {
-                  setIsProfileUpdating(true)
-                  setIsProfileUpdateError(false)
-                  await axios
-                    .post(
-                      `${NEXT_PUBLIC_BACKEND_URL}/member/post/upload-post-image`,
-                      formData
-                    )
-                    .then(async (response) => {
-                      if (response.data.success) {
-                        try {
-                          const sendReq = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/member/profile/update-profile-photo?data=${response.data.fileUrl}`, {
-                            method: "PUT",
-                            headers: {
-                              Authorization: authCookie
+              <Input
+                type="file"
+                ref={profilePhotoRef}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  const formData = new FormData();
+                  formData.append("file", file!);
+                  try {
+                    setIsProfileUpdating(true);
+                    setIsProfileUpdateError(false);
+                    await axios
+                      .post(
+                        `${NEXT_PUBLIC_BACKEND_URL}/member/post/upload-post-image`,
+                        formData
+                      )
+                      .then(async (response) => {
+                        if (response.data.success) {
+                          try {
+                            const sendReq = await fetch(
+                              `${NEXT_PUBLIC_BACKEND_URL}/member/profile/update-profile-photo?data=${response.data.fileUrl}`,
+                              {
+                                method: "PUT",
+                                headers: {
+                                  Authorization: authCookie,
+                                },
+                              }
+                            );
+
+                            const res = await sendReq.json();
+
+                            if (res.success) {
+                              fetchMemberProfile();
+                              setIsProfileUpdating(false);
                             }
-                          })
-                          
-                          const res =await sendReq.json()
-                          
-                          if (res.success) {
-                            fetchMemberProfile()
-                            setIsProfileUpdating(false);
+                          } catch (error) {
+                            console.log(error);
+                            setProfileUpadateError("Something is broken");
                           }
-                        } catch (error) {
-                          console.log(error);
-                          setProfileUpadateError("Something is broken")
                         }
-                      }
-                    })
-                    .catch((error) => {
-                      setIsProfileUpdating(false);
-                      setIsProfileUpdateError(true);
-                      setProfileUpadateError(error.response.data)
-                    });
-                } catch (error) {
-                  console.log(error);
-                  setIsProfileUpdating(false);
-                  setIsProfileUpdateError(true);
-                  setProfileUpadateError("Something is broken")
-                }
-                
-              }}
+                      })
+                      .catch((error) => {
+                        setIsProfileUpdating(false);
+                        setIsProfileUpdateError(true);
+                        setProfileUpadateError(error.response.data);
+                      });
+                  } catch (error) {
+                    console.log(error);
+                    setIsProfileUpdating(false);
+                    setIsProfileUpdateError(true);
+                    setProfileUpadateError("Something is broken");
+                  }
+                }}
               />
             </div>
           </div>
@@ -180,7 +185,7 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
 
             <div className="mt-8 border rounded shadow p-4">
               {/* Show plan details */}
-              <div className="flex space-x-16">
+              <div className="sm:flex sm:flex-row flex-col sm:space-x-16">
                 <div className="text-xl">
                   <p className="text-sm">
                     Current plan:{" "}
@@ -210,84 +215,88 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
                 </div>
                 <div>
                   <div>
-                    <p className="text-sm">Your profession:</p>
-                    <div className="flex space-x-1">
-                      <Input
-                        placeholder="Enter what you do"
-                        className="h-8"
-                        defaultValue={
-                          useUserStore.getState().memberProfile[0].profession!
-                        }
-                        disabled={isProfessionInputFieldDisabled}
-                        ref={professionRef}
-                        onChange={(e) => {
-                          setProfession(e.target.value);
-                        }}
-                      />
-
-                      {isEditingProfession ? (
-                        <Button
-                          className="h-8 font-bold"
-                          disabled={isProfessionUpdating}
-                          onClick={async () => {
-                            try {
-                              setIsProfessionUpdating(true);
-                              setIsProfessionUpdatingError(false);
-                              const sendReq = await fetch(
-                                `${NEXT_PUBLIC_BACKEND_URL}/member/profile/update-profession?data=${profession}`,
-                                {
-                                  method: "PUT",
-                                  headers: {
-                                    Authorization: authCookie,
-                                  },
-                                }
-                              );
-                              const res = await sendReq.json();
-
-                              if (res.success) {
-                                setIsEditingProfession(false);
-                                setIsProfessionInputFieldDisabled(true);
-                                fetchMemberProfile();
-                                setIsProfessionUpdating(false);
-                              } else {
-                                setIsEditingProfession(false);
-                                setIsProfessionInputFieldDisabled(true);
-                                setIsProfessionUpdating(false);
-                                setIsProfessionUpdatingError(true);
-                                setProfessionUpdatingError(res.message);
-                              }
-                            } catch (error) {
-                              console.log(error);
-                              setIsProfessionUpdatingError(true);
-                              setProfessionUpdatingError("Something is broken");
-                            }
+                    <div>
+                      <p className="text-sm font-semibold">Profession:</p>
+                      <div className="flex">
+                        <Input
+                          placeholder="Enter what you do"
+                          className="h-8"
+                          defaultValue={
+                            useUserStore.getState().memberProfile[0].profession!
+                          }
+                          disabled={isProfessionInputFieldDisabled}
+                          ref={professionRef}
+                          onChange={(e) => {
+                            setProfession(e.target.value);
                           }}
-                        >
-                          {isProfessionUpdating ? (
-                            <Loader className="animate-spin" />
-                          ) : (
-                            <p>Update</p>
-                          )}
-                        </Button>
-                      ) : (
-                        <SquarePen
-                          size={30}
-                          onClick={() => {
-                            setIsProfessionInputFieldDisabled(
-                              !isProfessionInputFieldDisabled
-                            );
-                            setIsEditingProfession(true);
-
-                            setTimeout(() => {
-                              professionRef.current?.focus();
-                            }, 10);
-                          }}
-                          className="bg-red-400 rounded p-0.5 hover:cursor-pointer"
                         />
-                      )}
+
+                        {isEditingProfession ? (
+                          <Button
+                            className="h-8 font-bold"
+                            disabled={isProfessionUpdating}
+                            onClick={async () => {
+                              try {
+                                setIsProfessionUpdating(true);
+                                setIsProfessionUpdatingError(false);
+                                const sendReq = await fetch(
+                                  `${NEXT_PUBLIC_BACKEND_URL}/member/profile/update-profession?data=${profession}`,
+                                  {
+                                    method: "PUT",
+                                    headers: {
+                                      Authorization: authCookie,
+                                    },
+                                  }
+                                );
+                                const res = await sendReq.json();
+
+                                if (res.success) {
+                                  setIsEditingProfession(false);
+                                  setIsProfessionInputFieldDisabled(true);
+                                  fetchMemberProfile();
+                                  setIsProfessionUpdating(false);
+                                } else {
+                                  setIsEditingProfession(false);
+                                  setIsProfessionInputFieldDisabled(true);
+                                  setIsProfessionUpdating(false);
+                                  setIsProfessionUpdatingError(true);
+                                  setProfessionUpdatingError(res.message);
+                                }
+                              } catch (error) {
+                                console.log(error);
+                                setIsProfessionUpdatingError(true);
+                                setProfessionUpdatingError(
+                                  "Something is broken"
+                                );
+                              }
+                            }}
+                          >
+                            {isProfessionUpdating ? (
+                              <Loader className="animate-spin" />
+                            ) : (
+                              <p>Update</p>
+                            )}
+                          </Button>
+                        ) : (
+                          <SquarePen
+                            size={30}
+                            onClick={() => {
+                              setIsProfessionInputFieldDisabled(
+                                !isProfessionInputFieldDisabled
+                              );
+                              setIsEditingProfession(true);
+
+                              setTimeout(() => {
+                                professionRef.current?.focus();
+                              }, 10);
+                            }}
+                            className="bg-red-400 rounded p-0.5 hover:cursor-pointer"
+                          />
+                        )}
+                      </div>
                     </div>
                     {/* GENDER */}
-                    <p className="text-sm mt-2">Gender</p>
+                    <p className="text-sm mt-2 font-semibold">Gender</p>
                     <div>
                       <Select
                         defaultValue={
@@ -366,7 +375,7 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
                       )}
                     </div>
                     {/* DOB */}
-                    <p className="text-sm mt-2">DOB:</p>
+                    <p className="text-sm mt-2 font-semibold">DOB:</p>
                     <div>
                       <Popover>
                         <PopoverTrigger asChild>
@@ -390,46 +399,53 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
                             mode="single"
                             selected={date}
                             onSelect={async (newDate) => {
-                              setDate(newDate)
+                              setDate(newDate);
 
                               try {
-                                setIsDobUpdating(true)
-                                setIsDobUpdatingError(false)
-                                setIsDobUpdatingSuccess(false)
-                                const sendReq = await fetch(`${NEXT_PUBLIC_BACKEND_URL}/member/profile/update-dob?data=${newDate}`,{
-                                  method: "PUT",
-                                  headers: {
-                                    Authorization: authCookie
+                                setIsDobUpdating(true);
+                                setIsDobUpdatingError(false);
+                                setIsDobUpdatingSuccess(false);
+                                const sendReq = await fetch(
+                                  `${NEXT_PUBLIC_BACKEND_URL}/member/profile/update-dob?data=${newDate}`,
+                                  {
+                                    method: "PUT",
+                                    headers: {
+                                      Authorization: authCookie,
+                                    },
                                   }
-                                })
-                                const res = await sendReq.json()
+                                );
+                                const res = await sendReq.json();
 
                                 if (res.success) {
-                                  setIsDobUpdating(false)
-                                  setIsDobUpdatingSuccess(true)
+                                  setIsDobUpdating(false);
+                                  setIsDobUpdatingSuccess(true);
                                 } else {
-                                  setIsDobUpdating(false)
-                                  setIsDobUpdatingError(true)
-                                  setDobUpdatingError(res.message)
+                                  setIsDobUpdating(false);
+                                  setIsDobUpdatingError(true);
+                                  setDobUpdatingError(res.message);
                                 }
                               } catch (error) {
                                 console.log(error);
-                                setIsDobUpdating(false)
-                                setIsDobUpdatingError(true)
-                                setDobUpdatingError("Something is broken")
+                                setIsDobUpdating(false);
+                                setIsDobUpdatingError(true);
+                                setDobUpdatingError("Something is broken");
                               }
-                              
                             }}
                             initialFocus
                           />
                         </PopoverContent>
                       </Popover>
-                      {
-                        isDobUpdating && (<p className="text-blue-600 font-bold flex items-center">Updating... <Loader className="animate-spin" size={18}/></p>)
-                      }
-                      {
-                        isDobUpdatingSuccess && (<p className="text-green-600 font-bold flex items-center">Success <CircleCheck size={18} /></p>)
-                      }
+                      {isDobUpdating && (
+                        <p className="text-blue-600 font-bold flex items-center">
+                          Updating...{" "}
+                          <Loader className="animate-spin" size={18} />
+                        </p>
+                      )}
+                      {isDobUpdatingSuccess && (
+                        <p className="text-green-600 font-bold flex items-center">
+                          Success <CircleCheck size={18} />
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
