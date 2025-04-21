@@ -128,7 +128,7 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
                 <TableCell>{member.name}</TableCell>
                 <TableCell>{member.email}</TableCell>
                 <TableCell className="uppercase">
-                  <Badge className="bg-amber-500 w-20 flex justify-center">
+                  <Badge className="bg-purple-600 w-20 flex justify-center">
                     {member.selectedPlan}
                   </Badge>
                 </TableCell>
@@ -153,7 +153,7 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
               </TableRow>
             ))}
 
-          {/* if search ective */}
+          {/* if search active */}
           {isSearchInputActive &&
             searchResult.map((member, index) => (
               <TableRow key={index}>
@@ -161,7 +161,7 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
                 <TableCell>{member.name}</TableCell>
                 <TableCell>{member.email}</TableCell>
                 <TableCell className="uppercase">
-                  <Badge className="bg-amber-500 w-20 flex justify-center">
+                  <Badge className="bg-purple-600 w-20 flex justify-center">
                     {member.selectedPlan}
                   </Badge>
                 </TableCell>
