@@ -157,7 +157,7 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
           {isSearchInputActive &&
             searchResult.map((member, index) => (
               <TableRow key={index}>
-                <TableCell>{index + 1}</TableCell>
+                <TableCell>{member.index}</TableCell>
                 <TableCell>{member.name}</TableCell>
                 <TableCell>{member.email}</TableCell>
                 <TableCell className="uppercase">
