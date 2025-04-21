@@ -13,11 +13,35 @@ import { AdminActionDropDown } from "./admin-action-dropdown";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Badge } from "./ui/badge";
+
+interface Member {
+  index: number | null;
+  memberId: number | null;
+  name: string | null;
+  email: string | null;
+  selectedPlan: string | null;
+  isActive: boolean;
+  subscriptionStarted: string | null;
+  subscriptionEnds: string | null;
+}
 
 export function AdminDashboard({ authCookie }: { authCookie: string }) {
   const { fetchMembers } = useAdminStore();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [isSearchInputActive, setIsSearchInputActive] = useState(false);
+
+  const [searchData, setSearchData] = useState("");
+  const [searchResult, setSearchResult] = useState<Member[]>([]);
+
+  useEffect(() => {
+    const result = useAdminStore
+      .getState()
+      .members.filter((member) => member.email?.includes(searchData));
+    setSearchResult(result);
+  }, [searchData, useAdminStore.getState().members]);
 
   useEffect(() => {
     fetchMembers({ authCookie });
@@ -31,12 +55,6 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
     );
   }
 
-  const data = useAdminStore.getState().members;
-  const newData = data.map((oldData, index) => ({
-    ...oldData,
-    index: index + 1,
-  }));
-
   function PageNumber() {
     const pageNumber: number[] = [];
     const totalPage = Math.ceil(
@@ -48,13 +66,13 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
     }
 
     return (
-      <div className="flex">
+      <div className="space-x-2">
         {pageNumber.map((page) => (
           <Button
             onClick={() => {
-              console.log(page);
               setCurrentPage(page);
             }}
+            className={`${page === currentPage ? "bg-primary" : "bg-gray-300"}`}
           >
             {page}
           </Button>
@@ -66,12 +84,28 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
   function getCurrentPageMembers() {
     const indexOfLastItem = currentPage * itemsPerPage; // 1 * 10 => 10
     const indexOfFirstItem = indexOfLastItem - itemsPerPage; // 10 - 10 => 0
-    const currentItems = newData.slice(indexOfFirstItem, indexOfLastItem);
+    const currentItems = useAdminStore
+      .getState()
+      .members.slice(indexOfFirstItem, indexOfLastItem);
     return currentItems;
   }
 
   return (
-    <div>
+    <div className="py-4 max-w-7xl mx-auto">
+      <div className="max-w-96">
+        <Input
+          placeholder="Global search: type here to search"
+          onChange={(e) => {
+            setIsSearchInputActive(true);
+            const searchTerm = e.target.value;
+            if (searchTerm.length === 0) {
+              setIsSearchInputActive(false);
+              return;
+            }
+            setSearchData(searchTerm);
+          }}
+        />
+      </div>
       <Table className="dark:bg-gray-900/80 max-w-7xl mx-auto">
         <TableHeader>
           <TableRow>
@@ -87,20 +121,60 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
         </TableHeader>
         <TableBody>
           {useAdminStore.getState().members.length !== 0 &&
+            !isSearchInputActive &&
             getCurrentPageMembers().map((member, index) => (
               <TableRow key={index}>
                 <TableCell>{member.index}</TableCell>
                 <TableCell>{member.name}</TableCell>
                 <TableCell>{member.email}</TableCell>
                 <TableCell className="uppercase">
-                  {member.selectedPlan}
+                  <Badge className="bg-amber-500 w-20 flex justify-center">
+                    {member.selectedPlan}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   {format(member.subscriptionStarted!, "PPP")}
                 </TableCell>
                 <TableCell>{format(member.subscriptionEnds!, "PPP")}</TableCell>
                 <TableCell>
-                  {member.isActive ? <p>Active</p> : <p>Inactive</p>}
+                  {member.isActive ? (
+                    <Badge className="bg-green-600">Active</Badge>
+                  ) : (
+                    <Badge className="bg-red-600">Inactive</Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <AdminActionDropDown
+                    memberId={member.memberId!}
+                    planStatus={member.isActive ? "Active" : "Inactive"}
+                    authCookie={authCookie}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+
+          {/* if search ective */}
+          {isSearchInputActive &&
+            searchResult.map((member, index) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{member.name}</TableCell>
+                <TableCell>{member.email}</TableCell>
+                <TableCell className="uppercase">
+                  <Badge className="bg-amber-500 w-20 flex justify-center">
+                    {member.selectedPlan}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {format(member.subscriptionStarted!, "PPP")}
+                </TableCell>
+                <TableCell>{format(member.subscriptionEnds!, "PPP")}</TableCell>
+                <TableCell>
+                  {member.isActive ? (
+                    <Badge className="bg-green-600">Active</Badge>
+                  ) : (
+                    <Badge className="bg-red-600">Inactive</Badge>
+                  )}
                 </TableCell>
                 <TableCell>
                   <AdminActionDropDown
@@ -114,7 +188,7 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
         </TableBody>
       </Table>
 
-      <div>
+      <div className="flex justify-center">
         <PageNumber />
       </div>
     </div>

@@ -6,6 +6,7 @@ import { NEXT_PUBLIC_BACKEND_URL } from "@/lib/config";
 
 // Members data type
 interface Member {
+    index: number | null,
     memberId: number | null,
     name: string | null,
     email: string | null,
@@ -259,7 +260,13 @@ const useAdminStore = create(persist<AdminStore>((set) => ({
                 }
             }).then((res) => {
                 if (res.data.success) {
-                    set({isLoading: false, isError: false, errorMessage: null, members: res.data.members})
+
+                    const updatedMemberData = res.data.members.map((member: Member[], index: number) => ({
+                        ...member,
+                        index: index + 1
+                    }))
+
+                    set({isLoading: false, isError: false, errorMessage: null, members: updatedMemberData})
                 } else{
                     set({isLoading: false, isError: true, errorMessage: res.data.message, members:[]})
                 }
