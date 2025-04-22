@@ -1,11 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Label,
-  Pie,
-  PieChart,
-} from "recharts";
+import { Label, Pie, PieChart } from "recharts";
 
 import {
   Card,
@@ -108,9 +104,9 @@ export default function ChartOverView({ authCookie }: { authCookie: string }) {
   } satisfies ChartConfig;
 
   return (
-    <div className="sm:flex-row flex flex-col justify-center items-center px-4 sm:space-x-10 sm:space-y-0 space-y-2 py-4">
+    <div className="sm:flex-row flex flex-col justify-center items-center sm:space-x-10 sm:space-y-0 space-y-2 py-4">
       {/* PIE CHART */}
-      <Card className="w-[400px]">
+      <Card className="sm:w-[400px] w-[350px]">
         <CardHeader className="flex justify-center items-center">
           <CardTitle>Members according to plans</CardTitle>
           <CardDescription>January - June 2025</CardDescription>
@@ -177,7 +173,7 @@ export default function ChartOverView({ authCookie }: { authCookie: string }) {
         </CardFooter>
       </Card>
       {/* Rev CHART */}
-      <Card className="w-[400px]">
+      <Card className="sm:w-[400px] w-[350px]">
         <CardHeader className="flex justify-center items-center">
           <CardTitle>Revenue according to plans</CardTitle>
           <CardDescription>January - June 2025</CardDescription>
