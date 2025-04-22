@@ -1,6 +1,7 @@
 "use client"
 
 import { useAdminStore } from "@/store/admin-store"
+import { Loader } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
@@ -14,7 +15,9 @@ const DashboardPage = () => {
   }, [])
 
   return (
-    <div>DashboardPage</div>
+    <div className="flex justify-center items-center min-h-[90vh]">
+      <Loader className="animate-spin"/>
+    </div>
   )
 }
 

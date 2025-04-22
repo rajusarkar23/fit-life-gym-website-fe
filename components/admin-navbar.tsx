@@ -2,6 +2,7 @@
 import { Dumbbell } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { MobileNav } from "./member-mobile-nav";
+import Link from "next/link";
 
 export function AdminHeader() {
 
@@ -20,11 +21,15 @@ export function AdminHeader() {
           </span>
 
           <div className="flex items-center justify-center">
-            <h3 className="font-bold text-xl italic">Admin Dashboard</h3>
+            <h3 className="font-bold text-xl italic text-blue-600">Admin Dashboard</h3>
           </div>
         </div>
         {/* LEFT SIDE OF THE HEADER */}
         <div className="flex items-center">
+          <div className="space-x-4">
+            <Link href={"/admin/dashboard"}>Dashboard</Link>
+            <Link href={"/admin/overview"}>Overview</Link>
+          </div>
           <ThemeToggle />
           {/* MOBILE MENU */}
           <div className="">
