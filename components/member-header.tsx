@@ -1,5 +1,5 @@
 "use client";
-import { Dumbbell } from "lucide-react";
+import { Dumbbell, LogOut } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { MobileNav } from "./member-mobile-nav";
 import Link from "next/link";
@@ -60,7 +60,7 @@ export function MemberHeader() {
               Profile
             </Link>
             <div
-              className="flex items-center bg-red-300 hover:bg-red-500 hover:cursor-pointer transition-all rounded-full px-4 font-bold"
+              className="flex items-center bg-orange-800 text-white hover:bg-red-500 hover:cursor-pointer transition-all rounded-full px-4 font-bold"
               onClick={async () => {
                 const sendReq = await fetch(
                   `${NEXT_PUBLIC_BACKEND_URL}/member/logout`,
@@ -80,7 +80,7 @@ export function MemberHeader() {
                 }
               }}
             >
-              Logout
+              Logout <LogOut size={20} className="ml-1"/>
             </div>
           </div>
           <ThemeToggle />

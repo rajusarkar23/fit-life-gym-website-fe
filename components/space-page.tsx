@@ -200,13 +200,13 @@ export default function SpacePage({ authCookie }: { authCookie: string }) {
       <div className="flex justify-center">
         <Sheet>
           <SheetTrigger
-            className="dark:bg-secondary w-48 rounded h-8 flex items-center justify-center "
+            className="sm:w-[500px] w-[360px] bg-violet-800 text-white rounded h-8 flex items-center justify-center "
             onClick={() => {
               setIsPostCreationSuccess(false);
             }}
             
           >
-            <CirclePlus size={20} className="mr-1" /> Create post
+            <CirclePlus size={20} className="mr-1" /> Post something
           </SheetTrigger>
           <SheetContent side={"left"}>
             <SheetHeader>
@@ -367,19 +367,8 @@ export default function SpacePage({ authCookie }: { authCookie: string }) {
     <div>
       {/* show posts */}
       <div className="flex flex-col items-center space-y-2">
-        <div className="flex justify-between sm:space-x-20 space-x-8 bg-red-400 rounded-full px-2 py-1 mt-2">
-          <div
-            className="flex items-center bg-white/60 rounded-full p-1 font-bold hover:cursor-pointer px-4"
-            onClick={() => {
-              router.push(
-                `/member/profile/${useUserStore.getState().username}`
-              );
-            }}
-          >
-            Profile
-            <CircleUserRound />
-          </div>
-          <div className="flex bg-white/60 rounded-full p-1 font-bold hover:cursor-pointer px-4">
+        <div className="flex justify-between sm:space-x-20 space-x-8 px-2 py-1 mt-2">
+          <div className="flex p-1 font-bold hover:cursor-pointer px-4">
            <CreatePost authToken={authCookie} />
           </div>
         </div>
