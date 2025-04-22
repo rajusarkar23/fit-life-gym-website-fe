@@ -72,7 +72,7 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
             onClick={() => {
               setCurrentPage(page);
             }}
-            className={`${page === currentPage ? "bg-primary" : "bg-gray-300"}`}
+            className={`${page === currentPage ? "bg-violet-700" : "bg-gray-300 text-black"}`}
           >
             {page}
           </Button>
@@ -92,7 +92,7 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
 
   return (
     <div className="py-4 max-w-7xl mx-auto">
-      <div className="max-w-96">
+      <div className="max-w-96 mb-1">
         <Input
           placeholder="Global search: type here to search"
           onChange={(e) => {
@@ -188,7 +188,7 @@ export function AdminDashboard({ authCookie }: { authCookie: string }) {
         </TableBody>
       </Table>
 
-      <div className="flex justify-center">
+      <div className="flex justify-center mt-2">
         <PageNumber />
       </div>
     </div>
