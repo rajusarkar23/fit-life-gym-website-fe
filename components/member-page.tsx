@@ -387,11 +387,11 @@ const MemberPage = ({ authCookie }: { authCookie: string }) => {
                             )}
                           >
                             <CalendarIcon />
-                            {date ? (
+                            {/* {date ? (
                               format(date, "PPP")
                             ) : (
                               <span>Pick a date</span>
-                            )}
+                            )} */}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
