@@ -46,7 +46,7 @@ export default function ChartOverView({ authCookie }: { authCookie: string }) {
   const [isDataActive, setIsDataActive] = React.useState(false);
   const [activeDataForSelectedPlan, setActiveDataForSelectedPlan] =
     React.useState<Member[]>([]);
-  const [planName, setPlanName] = React.useState("")
+  const [planName, setPlanName] = React.useState("");
 
   React.useEffect(() => {
     const fetchMember = async () => {
@@ -132,7 +132,13 @@ export default function ChartOverView({ authCookie }: { authCookie: string }) {
   function ShowDataInTable() {
     return (
       <div>
-        <h1 className="max-w-7xl mx-auto text-xl font-semibold">Showing data for <span className="text-orange-600 font-bold underline underline-offset-2">{planName}</span> plan</h1>
+        <h1 className="max-w-7xl mx-auto text-xl font-semibold">
+          Showing data for{" "}
+          <span className="text-orange-600 font-bold underline underline-offset-2">
+            {planName}
+          </span>{" "}
+          plan
+        </h1>
         <Table className="dark:bg-gray-900/80 max-w-7xl mx-auto">
           <TableHeader>
             <TableRow>
@@ -189,39 +195,6 @@ export default function ChartOverView({ authCookie }: { authCookie: string }) {
                 </TableCell>
               </TableRow>
             ))}
-
-            {/* if search active */}
-            {/* {isSearchInputActive &&
-            searchResult.map((member, index) => (
-              <TableRow key={index}>
-                <TableCell>{member.index}</TableCell>
-                <TableCell>{member.name}</TableCell>
-                <TableCell>{member.email}</TableCell>
-                <TableCell className="uppercase">
-                  <Badge className="bg-purple-600 w-20 flex justify-center">
-                    {member.selectedPlan}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {format(member.subscriptionStarted!, "PPP")}
-                </TableCell>
-                <TableCell>{format(member.subscriptionEnds!, "PPP")}</TableCell>
-                <TableCell>
-                  {member.isActive ? (
-                    <Badge className="bg-green-600">Active</Badge>
-                  ) : (
-                    <Badge className="bg-red-600">Inactive</Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <AdminActionDropDown
-                    memberId={member.memberId!}
-                    planStatus={member.isActive ? "Active" : "Inactive"}
-                    authCookie={authCookie}
-                  />
-                </TableCell>
-              </TableRow>
-            ))} */}
           </TableBody>
         </Table>
       </div>
@@ -293,7 +266,7 @@ export default function ChartOverView({ authCookie }: { authCookie: string }) {
                 className="flex items-center hover:cursor-pointer hover:underline underline-offset-2"
                 onClick={() => {
                   setIsDataActive(true);
-                  setPlanName("Premium")
+                  setPlanName("Premium");
                   const data = useAdminStore
                     .getState()
                     .members.filter(
@@ -302,14 +275,14 @@ export default function ChartOverView({ authCookie }: { authCookie: string }) {
                   setActiveDataForSelectedPlan(data);
                 }}
               >
-                <div className="rounded-full bg-[hsl(var(--chart-1))] w-3.5 h-3.5"></div>{" "}
+                <div className="rounded-full bg-[hsl(var(--chart-1))] w-3 h-3 mr-2"></div>{" "}
                 Premium: {premium.length}
               </div>
               <div
                 className="flex items-center hover:cursor-pointer hover:underline underline-offset-2"
                 onClick={() => {
                   setIsDataActive(true);
-                  setPlanName("Elite")
+                  setPlanName("Elite");
                   const data = useAdminStore
                     .getState()
                     .members.filter(
@@ -318,14 +291,14 @@ export default function ChartOverView({ authCookie }: { authCookie: string }) {
                   setActiveDataForSelectedPlan(data);
                 }}
               >
-                <div className="rounded-full bg-[hsl(var(--chart-2))] w-3.5 h-3.5"></div>{" "}
+                <div className="rounded-full bg-[hsl(var(--chart-2))] w-3 h-3 mr-2"></div>{" "}
                 Elite: {elite.length}
               </div>
               <div
                 className="flex items-center hover:cursor-pointer hover:underline underline-offset-2"
                 onClick={() => {
                   setIsDataActive(true);
-                  setPlanName("Basic")
+                  setPlanName("Basic");
                   const data = useAdminStore
                     .getState()
                     .members.filter(
@@ -334,7 +307,7 @@ export default function ChartOverView({ authCookie }: { authCookie: string }) {
                   setActiveDataForSelectedPlan(data);
                 }}
               >
-                <div className="rounded-full bg-[hsl(var(--chart-3))] w-3.5 h-3.5"></div>{" "}
+                <div className="rounded-full bg-[hsl(var(--chart-3))] w-3 h-3 mr-2"></div>{" "}
                 Basic: {basic.length}
               </div>
             </div>
@@ -401,25 +374,25 @@ export default function ChartOverView({ authCookie }: { authCookie: string }) {
           </CardContent>
           <CardFooter className="flex justify-center items-center">
             <div className="flex items-center space-x-4">
-              <div className="rounded-full bg-[hsl(var(--chart-1))] w-3.5 h-3.5"></div>{" "}
-              Premium: ${premium.length * 49}
-              <div className="rounded-full bg-[hsl(var(--chart-2))] w-3.5 h-3.5"></div>{" "}
-              Elite: ${elite.length * 79}
-              <div className="rounded-full bg-[hsl(var(--chart-3))] w-3.5 h-3.5"></div>{" "}
-              Basic: ${basic.length * 29}
+              <div className="rounded-full bg-[hsl(var(--chart-1))] w-3 h-3"></div>
+              <p className="flex">
+                Premium: <span>${premium.length * 49}</span>
+              </p>
+              <div className="rounded-full bg-[hsl(var(--chart-2))] w-3 h-3"></div>
+              <p className="flex">
+
+                Elite: <span>${elite.length * 79}</span>
+              </p>
+              <div className="rounded-full bg-[hsl(var(--chart-3))] w-3 h-3"></div>
+              <p className="flex">
+                Basic: <span>${basic.length * 29}</span>
+              </p>
             </div>
           </CardFooter>
         </Card>
       </div>
 
-      <div>{isDataActive && <div>
-        {
-          
-          <ShowDataInTable />
-          
-        }
-        
-        </div>}</div>
+      <div>{isDataActive && <div>{<ShowDataInTable />}</div>}</div>
     </div>
   );
 }
